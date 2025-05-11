@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://www.youtube.com/*
 // @grant       none
-// @version     1.0.2
+// @version     1.0.4
 // @author      iamasink
 // @description Always open youtube homepage links in new tab. The homepage takes forever to (properly) load, so just leave it open!
 // @homepage    https://github.com/iamasink/userscripts
