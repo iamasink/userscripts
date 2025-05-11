@@ -6,6 +6,11 @@
 // @version     1.0
 // @author      iamasink
 // @description Always open youtube homepage links in new tab. The homepage takes forever to (properly) load, so just leave it open!
+// @homepage 	https://github.com/iamasink/userscripts
+// @supportURL 	https://github.com/iamasink/userscripts/issues
+// @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeNewTab.user.js
+// @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeNewTab.user.js
+// @tag 	    youtube
 // ==/UserScript==
 
 
