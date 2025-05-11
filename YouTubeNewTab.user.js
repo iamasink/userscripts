@@ -20,7 +20,7 @@
 
 	const version = GM_info.script.version;
 
-	const LOGGING_ENABLED = true;
+	const LOGGING_ENABLED = false;
 	function log(...data) {
 		if (!LOGGING_ENABLED) return;
 		console.log('[YouTubeNewTab]', ...data);
@@ -29,7 +29,7 @@
 	const selector = 'a[href*="youtube.com/watch"], a[href*="youtu.be"], a[href^="/watch"]';
 
 	// run on page load
-	log(`YouTubeNewTab v${version} by iamasink loaded`);
+	console.log(`YouTubeNewTab v${version} by iamasink loaded`);
 	document.addEventListener('click', interceptClick, true);
 	log('Click interceptor attached');
 
