@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        YouTube New Tab
 // @namespace   Violentmonkey Scripts
+// @version     1.0.7
 // @match       https://www.youtube.com/*
-// @grant       none
-// @version     1.0.6
-// @author      iamasink
 // @description Always open youtube homepage links in new tab. The homepage takes forever to (properly) load, so just leave it open!
+// @grant       none
+// @author      iamasink
 // @homepage    https://github.com/iamasink/userscripts
 // @supportURL  https://github.com/iamasink/userscripts/issues
 // @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeNewTab.user.js
