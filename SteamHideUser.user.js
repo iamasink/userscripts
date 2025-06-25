@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Steam Hide Login Name
 // @namespace    Violentmonkey Scripts
-// @version      0.1
-// @description  Hide your Steam sign-in name
+// @version      0.1.1
+// @description  Hide your Steam sign-in name (kinda)
 // @match        https://*.steamcommunity.com/*
 // @match        https://*.steampowered.com/*
 // @grant        none
