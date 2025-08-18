@@ -1,3 +1,4 @@
 *.old
 template.*
 node_modules
+dist
