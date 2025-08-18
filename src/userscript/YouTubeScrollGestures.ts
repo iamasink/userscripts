@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   Violentmonkey Scripts
-// @version     1.2
+// @version     1.4
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/watch*
 // @grant       GM_getValue
@@ -20,48 +20,9 @@ import { addSettingsMenu } from '../lib/ytSettingsMenu'
 import type { SettingOption } from '../lib/ytSettingsMenu'
 
 (function () {
-
 	/////// options ///////
 	const LOGGING_ENABLED = true
 
-	// Load saved settings or defaults
-	let ENABLE_SPEED_SCROLL = GM_getValue('sg-speed-enabled', true)
-	let SPEED_STEP = parseFloat(GM_getValue('sg-speed-step', "0.05"))
-	let SPEED_REQUIRES_RCLICK = GM_getValue('sg-speed-rclick', false)
-
-	let ENABLE_VOLUME_SCROLL = GM_getValue('sg-volume-enabled', true)
-	let VOLUME_STEP = parseFloat(GM_getValue('sg-volume-step', "2"))
-	let VOLUME_REQUIRES_RCLICK = GM_getValue('sg-volume-rclick', true)
-
-	const SETTINGS: SettingOption[] = [
-		{
-			label: "Enable Volume Scroll",
-			type: "checkbox", defaultValue: true, onChange: val => { ENABLE_VOLUME_SCROLL = val; GM_setValue('sg-volume-enabled', val) }
-		},
-		{
-			label: 'Volume Step',
-			type: 'number', defaultValue: VOLUME_STEP, onChange: val => { VOLUME_STEP = val; GM_setValue('sg-volume-step', val) }, step: 1, min: 1, max: 25
-		},
-		{
-			label: 'Volume Requires Right-Click',
-			type: 'checkbox', defaultValue: VOLUME_REQUIRES_RCLICK, onChange: val => { VOLUME_REQUIRES_RCLICK = val; GM_setValue('sg-volume-rclick', val) }
-		},
-		{ type: 'spacer' },
-		{
-			label: "Enable Speed Scroll",
-			type: "checkbox", defaultValue: true, onChange: val => { ENABLE_SPEED_SCROLL = val; GM_setValue('sg-speed-enabled', val) }
-		},
-		{
-			label: 'Speed Step',
-			type: 'number', defaultValue: SPEED_STEP, onChange: val => { SPEED_STEP = val; GM_setValue('sg-speed-step', val) }, step: 0.05, min: 0.05, max: 5
-		},
-		{
-			label: 'Speed Requires Right-Click',
-			type: 'checkbox', defaultValue: SPEED_REQUIRES_RCLICK, onChange: val => { SPEED_REQUIRES_RCLICK = val; GM_setValue('sg-speed-rclick', val) }
-		},
-	]
-
-	///////         ///////
 
 	// script full name from @name
 	const SCRIPT_NAME = GM_info.script.name
@@ -76,6 +37,23 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 	const logError = (...args: any[]) => console.error(LOG_PREFIX, ...args)
 
 	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`)
+
+	///////
+
+	// Load saved settings or defaults
+	const SETTINGS: SettingOption[] = [
+		{ label: 'Reverse Scroll Direction', type: 'checkbox', defaultValue: false },
+		{ type: 'spacer' },
+		{ label: 'Enable Volume Scroll', type: 'checkbox', defaultValue: true },
+		{ label: 'Volume Requires RClick', type: 'checkbox', defaultValue: true },
+		{ label: 'Volume Step', type: 'number', defaultValue: 2, step: 1, min: 1, max: 25 },
+		{ type: 'spacer' },
+		{ label: 'Enable Speed Scroll', type: 'checkbox', defaultValue: true },
+		{ label: 'Speed Requires RClick', type: 'checkbox', defaultValue: false },
+		{ label: 'Speed Step', type: 'number', defaultValue: 0.05, step: 0.05, min: 0.05, max: 5 },
+	]
+
+	const sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
 
 	///////
 
@@ -116,6 +94,15 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 
 
 	document.addEventListener('wheel', e => {
+		const VOLUME_REQUIRES_RCLICK = sm.getSetting("Volume Requires RClick") as boolean
+		const ENABLE_VOLUME_SCROLL = sm.getSetting("Enable Volume Scroll") as boolean
+		const VOLUME_STEP = sm.getSetting("Volume Step") as number
+		const ENABLE_SPEED_SCROLL = sm.getSetting("Enable Speed Scroll") as boolean
+		const SPEED_REQUIRES_RCLICK = sm.getSetting("Speed Requires RClick") as boolean
+		const SPEED_STEP = sm.getSetting("Speed Step") as number
+
+		const REVERSE_SCROLL_DIRECTION = (sm.getSetting("Reverse Scroll Direction") as boolean) ? -1 : 1
+
 		const player: any = document.querySelector('#movie_player')
 		const video = document.querySelector('video')!
 		if (!player) {
@@ -131,7 +118,7 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 			wheelUsed = true
 
 			const currVol = player.getVolume()
-			const delta = Math.sign(e.deltaY)
+			const delta = Math.sign(e.deltaY) * REVERSE_SCROLL_DIRECTION
 			const nextVol = delta < 0 ? Math.min(currVol + VOLUME_STEP, 100) : Math.max(currVol - VOLUME_STEP, 0)
 			player.unMute()
 			player.setVolume(nextVol)
@@ -170,7 +157,7 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 			log("curr", currSpeed)
 
 
-			const delta = Math.sign(e.deltaY)
+			const delta = Math.sign(e.deltaY) * REVERSE_SCROLL_DIRECTION
 			let nextSpeed = currSpeed + (delta < 0 ? SPEED_STEP : -SPEED_STEP)
 			nextSpeed = Math.max(0.1, Math.min(nextSpeed, 5))
 
@@ -232,7 +219,6 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 		if (!owner) return
 
 		addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
-
 		observer.disconnect()
 	})
 	observer.observe(document.body, { childList: true, subtree: true })
