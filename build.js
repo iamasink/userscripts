@@ -19,6 +19,10 @@ function extractMetadata(filePath) {
 }
 
 function buildAll() {
+
+	// current build time
+	const BUILD_TIME = new Date().toISOString();
+
 	const files = fs.readdirSync(srcDir).filter(f => f.endsWith(".ts"));
 	console.log("Building:", files);
 	for (const f of files) {
@@ -32,7 +36,11 @@ function buildAll() {
 			outfile: outFile,
 			banner: { js: extractMetadata(entry) },
 			sourcemap: false,
-			legalComments: "none"
+			legalComments: "none",
+			define: {
+				BUILD_TIME: JSON.stringify(BUILD_TIME),
+				ENV: `"prod"`
+			}
 		});
 		console.log("done", f, "->", outFile);
 	}
