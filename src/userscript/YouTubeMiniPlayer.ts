@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @version     1.4
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
-// @match       https://www.youtube.com/watch*
+// @match       https://www.youtube.com/*
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @author      iamasink
@@ -28,6 +28,12 @@ import type { SettingOption } from '../lib/settingsMenu'
 	const MINI_POS_CLASS_PREFIX = `${shortnameLower}-miniplayerpos`
 	const MINI_SIZE_CLASS_PREFIX = `${shortnameLower}-miniplayersize`
 	const CTRLS_CLASS = `${shortnameLower}-miniplayer-ctrls`
+	let listenersAdded = false
+	let ticking = false
+	let playerEl: HTMLElement | null = null
+	let active = false
+	let closed = false
+	let triggerY = 500
 
 	const POSITIONS = ["top-right", "top-left", "bottom-left", "bottom-right"]
 	const SIZES = {
@@ -52,19 +58,30 @@ import type { SettingOption } from '../lib/settingsMenu'
 		{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
 	])
 
+	function addGlobalListeners() {
+		if (listenersAdded) return
+
+		window.addEventListener('scroll', onScroll, { passive: true })
+		window.addEventListener('resize', onResize, { passive: true })
+		window.addEventListener('yt-navigate-finish', onNavigate)
+
+		listenersAdded = true
+		log("Global listeners added")
+	}
+
+	function onNavigate() {
+		main()
+	}
+	function onResize() {
+		log("resize")
+	}
 
 
-
-	let playerEl: any = null
-	let active = false
-	let closed = false
-	let triggerY = 500
-
-	// inject css (class-driven)
-	if (!document.getElementById(STYLE_ID)) {
-		const s = document.createElement('style')
-		s.id = STYLE_ID
-		s.textContent = `
+	function injectCSS() {
+		if (!document.getElementById(STYLE_ID)) {
+			const s = document.createElement('style')
+			s.id = STYLE_ID
+			s.textContent = `
 .${MINI_CLASS} {
 	position: fixed !important;
 	z-index: 9999 !important;
@@ -117,7 +134,8 @@ ${sizeClassesCSS}
     padding: 0;
 }
 `
-		document.head.appendChild(s)
+			document.head.appendChild(s)
+		}
 	}
 
 	function findPlayer() {
@@ -187,8 +205,8 @@ ${sizeClassesCSS}
 	}
 
 
-	let ticking = false
 	function onScroll() {
+		log("scroll")
 		if (ticking) return
 		ticking = true
 		requestAnimationFrame(() => {
@@ -216,22 +234,20 @@ ${sizeClassesCSS}
 		})
 	}
 
+
 	function main() {
-		log("readying")
+		log("main() called")
+
+		injectCSS()
+
+		addGlobalListeners()
+
 		playerEl = findPlayer()
-		window.addEventListener('scroll', onScroll, { passive: true })
-		window.addEventListener('resize', () => {
-		}, { passive: true })
-		// initial check
+		if (!playerEl) {
+			log("No player found")
+			return
+		}
+
 		onScroll()
 	}
-
-	window.addEventListener?.('yt-navigate-finish', () => {
-		closed = false
-		if (active && playerEl) restore(playerEl)
-		playerEl = null
-		setTimeout(() => main(), 300)
-	})
-
-	main()
 })()
