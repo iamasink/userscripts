@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
 // @namespace   Violentmonkey Scripts
-// @version     1.0
+// @version     1.0.1
 // @description Add a button to open current YouTube Mix in YouTube Music
 // @match       https://www.youtube.com/*
 // @grant       window.close
