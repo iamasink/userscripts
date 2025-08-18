@@ -13,6 +13,10 @@ These were made for [Violentmonkey](https://violentmonkey.github.io/) so might n
 
 [Install](YouTubeMixToMusicButton.user.js?raw=1)
 
+## YouTubeScrollGestures.user.js
+> Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"  
+
+[Install](YouTubeScrollGestures.user.js?raw=1)
 
 # YouTube Music
 ## YouTubeMusicScrollVolume.user.js
