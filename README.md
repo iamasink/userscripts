@@ -18,6 +18,11 @@ These were made for [Violentmonkey](https://violentmonkey.github.io/) so might n
 
 [Install](dist/YouTubeScrollGestures.user.js?raw=1)
 
+## YouTubeMiniPlayer.user.js
+> Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"  
+
+[Install](dist/YouTubeMiniPlayer.user.js?raw=1)
+
 # YouTube Music
 ## YouTubeMusicScrollVolume.user.js
 > Use scroll wheel to change volume anywhere on YouTube Music  
