@@ -19,6 +19,20 @@
 
 "use strict";
 (() => {
+  // src/lib/init.ts
+  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
+    const SCRIPT_NAME = GM_info.script.name;
+    const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
+    const SCRIPT_VERSION = GM_info.script.version;
+    const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
+    const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
+    const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
+    const logError = (...args) => console.error(LOG_PREFIX, ...args);
+    console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+    console.log(`[${SCRIPT_SHORTNAME}] built @${"2025-08-18T06:53:50.963Z"}`);
+    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError };
+  }
+
   // src/lib/ytSettingsMenu.ts
   function addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME = SCRIPT_SHORTNAME, options) {
     function ensureOptionsMenu() {
@@ -169,15 +183,7 @@
 
   // src/userscript/YouTubeScrollGestures.ts
   (function() {
-    const LOGGING_ENABLED = true;
-    const SCRIPT_NAME = GM_info.script.name;
-    const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
-    const SCRIPT_VERSION = GM_info.script.version;
-    const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
-    const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
-    const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
-    const logError = (...args) => console.error(LOG_PREFIX, ...args);
-    console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+    const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({});
     const SETTINGS = [
       { label: "Reverse Scroll Direction", type: "checkbox", defaultValue: false },
       { type: "spacer" },
