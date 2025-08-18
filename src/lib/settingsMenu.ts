@@ -120,11 +120,14 @@ export function addSettingsMenu(
 		content.className = `sinkusoption-section-content-${SCRIPT_SHORTNAME}`
 		section.appendChild(content)
 
+		// ok this doesnt really work but i cba to change it
+
 		const existingSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkusoption-section-"]'))
 		const index = existingSections.findIndex(s => {
 			const h = s.querySelector('h4')?.textContent ?? ''
-			return h.localeCompare(SCRIPT_NAME, undefined, { sensitivity: 'base' }) > 0
+			return h.localeCompare(SCRIPT_NAME, undefined, { sensitivity: 'base' }) < 0
 		})
+		console.log(index)
 
 		if (index === -1) {
 			popup.appendChild(section)
