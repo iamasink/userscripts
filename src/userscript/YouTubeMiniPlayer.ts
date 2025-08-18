@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   Violentmonkey Scripts
-// @version     1.3
+// @version     1.4
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/watch*
 // @grant       GM_getValue
@@ -31,10 +31,17 @@ import type { SettingOption } from '../lib/settingsMenu'
 
 	const POSITIONS = ["top-right", "top-left", "bottom-left", "bottom-right"]
 	const SIZES = {
-		"280x150": { width: '280px', height: '158px' },
-		"360x200": { width: '360px', height: '202px' },
-		"480x270": { width: '480px', height: '270px' },
+		"400x225": { width: '400px', height: '225px' },
+		"560x315": { width: '560px', height: '315px' },
+		"720x405": { width: '720px', height: '405px' },
+		"800x450": { width: '800px', height: '450px' },
+		"880x495": { width: '880px', height: '495px' },
+		"1040x585": { width: '1040px', height: '585px' },
+		"1120x630": { width: '1120px', height: '630px' },
+		"1200x675": { width: '1200px', height: '675px' },
+		"1280x720": { width: '1280px', height: '720px' },
 	}
+
 	const sizeClassesCSS = Object.entries(SIZES)
 		.map(([key, val]) => `.${MINI_CLASS}.${MINI_SIZE_CLASS_PREFIX}-${key}{width:${val.width} !important;height:${val.height} !important;}`)
 		.join("\n")
