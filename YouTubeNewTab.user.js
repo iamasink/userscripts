@@ -17,19 +17,31 @@
 
 
 (function () {
-
-	const version = GM_info.script.version;
-
+	/////// options ///////
 	const LOGGING_ENABLED = false;
-	function log(...data) {
-		if (!LOGGING_ENABLED) return;
-		console.log('[YouTubeNewTab]', ...data);
-	}
+
+
+	///////         ///////
+
+	// script full name from @name
+	const SCRIPT_NAME = GM_info.script.name;
+	// script short name from updateurl filename
+	const SCRIPT_SHORTNAME = GM_info.script.updateURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".");
+	// script version
+	const SCRIPT_VERSION = GM_info.script.version;
+
+	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
+	const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
+	const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
+	const logError = (...args) => console.error(LOG_PREFIX, ...args);
+
+	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+
+	///////
 
 	const selector = 'a[href*="youtube.com/watch"], a[href*="youtu.be"], a[href^="/watch"]';
 
 	// run on page load
-	console.log(`YouTubeNewTab v${version} by iamasink loaded`);
 	document.addEventListener('click', interceptClick, true);
 	log('Click interceptor attached');
 
