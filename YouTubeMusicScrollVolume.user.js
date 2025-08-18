@@ -18,93 +18,87 @@
 
 (function () {
 	/////// options ///////
-	const LOGGING_ENABLED = true
-
+	const LOGGING_ENABLED = false;
 
 
 	///////         ///////
 
 	// script full name from @name
-	const SCRIPT_NAME = GM_info.script.name
+	const SCRIPT_NAME = GM_info.script.name;
 	// script short name from updateurl filename
-	const SCRIPT_SHORTNAME = GM_info.script.updateURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".")
+	const SCRIPT_SHORTNAME = GM_info.script.updateURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".");
 	// script version
-	const SCRIPT_VERSION = GM_info.script.version
+	const SCRIPT_VERSION = GM_info.script.version;
 
-	const logprefix = `[${SCRIPT_SHORTNAME}]`
-	function log(...args) {
-		if (!LOGGING_ENABLED) return
-		console.log(logprefix, ...args)
-	}
-	function logwarn(...args) {
-		console.warn(logprefix, ...args)
-	}
-	function logerror(...args) {
-		console.error(logprefix, ...args)
-	}
+	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
+	const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
+	const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
+	const logError = (...args) => console.error(LOG_PREFIX, ...args);
 
-	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`)
+	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
 
-	let volumeSliderTimeout
+	////////////////
+
+	let volumeSliderTimeout;
 
 	addEventListener("wheel", (event) => {
 		// log(event)
 
 		// ignore ctrl+scroll zooms
-		if (event.ctrlKey) return
+		if (event.ctrlKey) return;
 
 		// ignore if over scrollable element
-		if (isInsideScrollable(event.target)) return
+		if (isInsideScrollable(event.target)) return;
 
-		const player = document.querySelector('#movie_player')
+		const player = document.querySelector('#movie_player');
 		if (!player) {
-			logwarn("no player. is the page still loading?")
-			return
+			logwarn("no player. is the page still loading?");
+			return;
 		}
 
-		const delta = Math.sign(-event.deltaY)
-		const step = 2
+		const delta = Math.sign(-event.deltaY);
+		const step = 2;
 
 		try {
-			const currentVol = player.getVolume()
-			const newVol = Math.min(100, Math.max(0, currentVol + (step * delta)))
-			if (player.isMuted() && newVol > 0) player.unMute()
-			player.setVolume(newVol)
+			const currentVol = player.getVolume();
+			const newVol = Math.min(100, Math.max(0, currentVol + (step * delta)));
+			if (player.isMuted() && newVol > 0) player.unMute();
+			player.setVolume(newVol);
 
 			// update volume slider
-			const volumeSlider = document.querySelector('tp-yt-paper-slider#volume-slider')
+			const volumeSlider = document.querySelector('tp-yt-paper-slider#volume-slider');
 			if (volumeSlider) {
-				volumeSlider.value = newVol
-				volumeSlider.classList.add("on-hover")
+				volumeSlider.value = newVol;
+				volumeSlider.classList.add("on-hover");
 
 				// remove hover after timeout (hide slider)
-				clearTimeout(volumeSliderTimeout)
+				clearTimeout(volumeSliderTimeout);
 				volumeSliderTimeout = setTimeout(() => {
-					volumeSlider.classList.remove("on-hover")
-				}, 1000)
+					volumeSlider.classList.remove("on-hover");
+				}, 1000);
 			}
 
-			log(`changed volume: ${newVol}`)
+			log(`changed volume: ${newVol}`);
 
 		} catch (e) {
-			logwarn("couldn't get/set volume. is the page still loading?", e)
+			logwarn("couldn't get/set volume. is the page still loading?", e);
 		}
-	}, { passive: true })
+	}, { passive: true });
 
 	function isInsideScrollable(el) {
 		while (el && el !== document.body) {
-			const style = getComputedStyle(el)
-			const scrollY = el.scrollHeight > el.clientHeight
-			const scrollX = el.scrollWidth > el.clientWidth
-			const overflow = style.overflow + style.overflowY + style.overflowX
-			if ((scrollY || scrollX) && /auto|scroll/.test(overflow)) return true
+			const style = getComputedStyle(el);
+			const scrollY = el.scrollHeight > el.clientHeight;
+			const scrollX = el.scrollWidth > el.clientWidth;
+			const overflow = style.overflow + style.overflowY + style.overflowX;
+			if ((scrollY || scrollX) && /auto|scroll/.test(overflow)) return true;
 			// prevent on playlist page
-			if (el.id === "contents") return true
+			if (el.id === "contents") return true;
 			// prevent when hovering volume slider (own implementation)
-			if (el.id === "volume-slider") return true
-			el = el.parentElement
+			if (el.id === "volume-slider") return true;
+			el = el.parentElement;
 		}
-		return false
+		return false;
 	}
 
-})()
+})();
