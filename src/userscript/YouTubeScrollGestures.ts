@@ -54,8 +54,8 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 			const player: any = document.querySelector('#movie_player')!
 			// middleclick
 			wheelUsed = false
-			e.preventDefault()
 			if (rightMouseDown) {
+				e.preventDefault()
 				if (player.isMuted()) {
 					showOverlay('Volume', `Unmuted`)
 					player.unMute()
@@ -64,6 +64,7 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 					player.mute()
 				}
 			} else if (e.ctrlKey) {
+				e.preventDefault()
 				showOverlay('Speed', `1.00x`)
 				player.setPlaybackRate(1)
 			}
