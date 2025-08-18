@@ -120,7 +120,7 @@ export function addSettingsMenu(
 		content.className = `sinkusoption-section-content-${SCRIPT_SHORTNAME}`
 		section.appendChild(content)
 
-		const existingSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkus-section-"]'))
+		const existingSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkusoption-section-"]'))
 		const index = existingSections.findIndex(s => {
 			const h = s.querySelector('h4')?.textContent ?? ''
 			return h.localeCompare(SCRIPT_NAME, undefined, { sensitivity: 'base' }) > 0
@@ -132,7 +132,7 @@ export function addSettingsMenu(
 			popup.insertBefore(section, existingSections[index])
 		}
 
-		const allSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkus-section-"]'))
+		const allSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkusoption-section-"]'))
 		allSections.forEach((sec, i) => {
 			if (i === 0) sec.style.borderTop = 'none'
 			else sec.style.borderTop = '1px solid rgba(255,255,255,0.08)'
