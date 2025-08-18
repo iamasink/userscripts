@@ -1,2 +1,3 @@
 *.old
 template.*
+node_modules

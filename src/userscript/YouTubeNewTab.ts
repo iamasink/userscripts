@@ -18,60 +18,60 @@
 
 (function () {
 	/////// options ///////
-	const LOGGING_ENABLED = false;
+	const LOGGING_ENABLED = false
 
 
 	///////         ///////
 
 	// script full name from @name
-	const SCRIPT_NAME = GM_info.script.name;
+	const SCRIPT_NAME = GM_info.script.name
 	// script short name from updateurl filename
-	const SCRIPT_SHORTNAME = GM_info.script.updateURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".");
+	const SCRIPT_SHORTNAME = GM_info.script.updateURL!.split("/").slice(-1)[0].split(".").slice(0, -2).join(".")
 	// script version
-	const SCRIPT_VERSION = GM_info.script.version;
+	const SCRIPT_VERSION = GM_info.script.version
 
-	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
-	const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
-	const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
-	const logError = (...args) => console.error(LOG_PREFIX, ...args);
+	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`
+	const log = (...args: any) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args)
+	const logWarn = (...args: any) => console.warn(LOG_PREFIX, ...args)
+	const logError = (...args: any) => console.error(LOG_PREFIX, ...args)
 
-	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`)
 
 	///////
 
-	const selector = 'a[href*="youtube.com/watch"], a[href*="youtu.be"], a[href^="/watch"]';
+	const selector = 'a[href*="youtube.com/watch"], a[href*="youtu.be"], a[href^="/watch"]'
 
 	// run on page load
-	document.addEventListener('click', interceptClick, true);
-	log('Click interceptor attached');
+	document.addEventListener('click', interceptClick, true)
+	log('Click interceptor attached')
 
 	// intercept click events
-	function interceptClick(e) {
+	function interceptClick(e: any) {
 		if (window.location.pathname !== '/') {
-			log('not on homepage; ignoring click');
-			return;
+			log('not on homepage; ignoring click')
+			return
 		}
 
-		const link = e.target.closest(selector);
+		const link = e.target.closest(selector)
 		if (!link) {
-			log('no link found');
-			return;
+			log('no link found')
+			return
 		};
 
 		// Allow modifier keys for user preference
 		if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
-			log('ignoring modifier key click');
-			return;
+			log('ignoring modifier key click')
+			return
 		}
 
 		// prevent youtubes default navigation
-		e.preventDefault();
-		e.stopImmediatePropagation();
-		e.stopPropagation();
-		log('Intercepted click:', link.href);
+		e.preventDefault()
+		e.stopImmediatePropagation()
+		e.stopPropagation()
+		log('Intercepted click:', link.href)
 
 		// open in new tab
-		window.open(link.href, '_blank', 'noopener');
+		window.open(link.href, '_blank', 'noopener')
 	}
 
-})();
+})()

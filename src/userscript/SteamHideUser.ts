@@ -18,28 +18,28 @@
 
 
 (function () {
-	'use strict';
+	'use strict'
 	const HIDE_SELECTOR = [
 		'h2.pageheader.youraccount_pageheader',
 		'h2.addfunds_pageheader',
 		'.page_header_ctn.account_management > .page_content > h2.pageheader',
 		'#help_home_block .help_intro_text'
-	].join(', ');
+	].join(', ')
 
 
 	function hideUsername() {
-		document.querySelectorAll(HIDE_SELECTOR).forEach(el => {
-			el.style.color = 'transparent';
-			el.style.opacity = '255';
+		document.querySelectorAll(HIDE_SELECTOR).forEach((el: any) => {
+			el.style.color = 'transparent'
+			el.style.opacity = '255'
 			el.textContent = "hidden"
-		});
+		})
 
-		document.querySelectorAll(".account_name").forEach(el => {
-			el.textContent = "";
+		document.querySelectorAll(".account_name").forEach((el: any) => {
+			el.textContent = ""
 
 		})
 	}
 
 	// run on load
-	hideUsername();
-})();
+	hideUsername()
+})()
