@@ -1,0 +1,230 @@
+// ==UserScript==
+// @name        YouTube Popup Player
+// @namespace   Violentmonkey Scripts
+// @version     1.3
+// @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
+// @match       https://www.youtube.com/watch*
+// @grant       GM_getValue
+// @grant       GM_setValue
+// @author      iamasink
+// @homepage    https://github.com/iamasink/userscripts
+// @supportURL  https://github.com/iamasink/userscripts/issues
+// @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeMiniPlayer.user.js
+// @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeMiniPlayer.user.js
+// @tag         tags
+// @icon        https://www.google.com/s2/favicons?domain=youtube.com
+// @license     MIT
+// ==/UserScript==
+
+import { init } from "../lib/init"
+import { addSettingsMenu } from '../lib/settingsMenu'
+import type { SettingOption } from '../lib/settingsMenu'
+
+(function () {
+	const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({})
+	const shortnameLower = SCRIPT_SHORTNAME.toLowerCase()
+	const STYLE_ID = `${shortnameLower}-miniplayer-style`
+	const MINI_CLASS = `${shortnameLower}-miniplayer`
+	const MINI_POS_CLASS_PREFIX = `${shortnameLower}-miniplayerpos`
+	const MINI_SIZE_CLASS_PREFIX = `${shortnameLower}-miniplayersize`
+	const CTRLS_CLASS = `${shortnameLower}-miniplayer-ctrls`
+
+	const POSITIONS = ["top-right", "top-left", "bottom-left", "bottom-right"]
+	const SIZES = {
+		"280x150": { width: '280px', height: '158px' },
+		"360x200": { width: '360px', height: '202px' },
+		"480x270": { width: '480px', height: '270px' },
+	}
+	const sizeClassesCSS = Object.entries(SIZES)
+		.map(([key, val]) => `.${MINI_CLASS}.${MINI_SIZE_CLASS_PREFIX}-${key}{width:${val.width} !important;height:${val.height} !important;}`)
+		.join("\n")
+	log(sizeClassesCSS)
+
+	const sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
+		{ label: 'Miniplayer Position', type: 'select', choices: POSITIONS, defaultValue: "top-right" },
+		{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
+	])
+
+
+
+
+	let playerEl: any = null
+	let active = false
+	let closed = false
+	let triggerY = 500
+
+	// inject css (class-driven)
+	if (!document.getElementById(STYLE_ID)) {
+		const s = document.createElement('style')
+		s.id = STYLE_ID
+		s.textContent = `
+.${MINI_CLASS} {
+	position: fixed !important;
+	z-index: 9999 !important;
+	box-shadow: 0 0 24px rgba(0,0,0,0.6) !important;
+	transform: none !important;
+}
+
+${sizeClassesCSS}
+
+/* Miniplayer positions */
+.${MINI_CLASS}.${MINI_POS_CLASS_PREFIX}-top-right {
+	top: 20px !important;
+	right: 20px !important;
+	bottom: auto !important;
+	left: auto !important;
+}
+.${MINI_CLASS}.${MINI_POS_CLASS_PREFIX}-top-left {
+	top: 20px !important;
+	left: 20px !important;
+	bottom: auto !important;
+	right: auto !important;
+}
+.${MINI_CLASS}.${MINI_POS_CLASS_PREFIX}-bottom-left {
+	bottom: 20px !important;
+	left: 20px !important;
+	top: auto !important;
+	right: auto !important;
+}
+.${MINI_CLASS}.${MINI_POS_CLASS_PREFIX}-bottom-right {
+	bottom: 20px !important;
+	right: 20px !important;
+	top: auto !important;
+	left: auto !important;
+}
+.${CTRLS_CLASS} {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    cursor: pointer;
+    z-index: 10000;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    padding: 0;
+}
+`
+		document.head.appendChild(s)
+	}
+
+	function findPlayer() {
+		const player = document.getElementById('movie_player')
+		log("found player", player)
+		return player
+	}
+
+	function activate(target: HTMLElement) {
+		log("activating")
+		if (!target || closed || target.classList.contains(MINI_CLASS)) {
+			log("no")
+			return
+		}
+		const pos = sm.getSetting("Miniplayer Position")
+		log("pos", pos)
+
+		Object.keys(SIZES).forEach(k => target.classList.remove(`${MINI_SIZE_CLASS_PREFIX}-${k}`))
+		const size = sm.getSetting("Miniplayer Size") as keyof typeof SIZES
+		log("size", size)
+
+		for (let i = 0, len = POSITIONS.length; i < len; i++) {
+			target.classList.remove(`${MINI_POS_CLASS_PREFIX}-${POSITIONS[i]}`)
+		}
+
+		target.classList.add(MINI_CLASS)
+		target.classList.add(`${MINI_POS_CLASS_PREFIX}-${pos}`)
+		target.classList.add(`${MINI_SIZE_CLASS_PREFIX}-${size}`)
+
+		// trigger youtube's resize logic
+		window.dispatchEvent(new Event("resize"))
+
+		let closeBtn = target.querySelector("." + CTRLS_CLASS) as HTMLElement
+		if (!closeBtn) {
+			closeBtn = document.createElement('button')
+			closeBtn.textContent = 'x'
+			closeBtn.className = CTRLS_CLASS
+			closeBtn.addEventListener('click', () => {
+				closed = true
+				restore(target)
+			})
+			target.appendChild(closeBtn)
+		}
+
+		active = true
+		playerEl = target
+	}
+
+	function restore(target: HTMLElement) {
+		log("restoring")
+		if (!target) {
+			log("no target")
+			return
+		}
+
+		target.classList.remove(MINI_CLASS)
+
+		const closeBtn = target.querySelector("." + CTRLS_CLASS)
+		if (closeBtn) closeBtn.remove()
+
+		// trigger youtube's resize logic to resize the video player
+		window.dispatchEvent(new Event("resize"))
+
+
+		if (playerEl === target) playerEl = null
+		active = false
+	}
+
+
+	let ticking = false
+	function onScroll() {
+		if (ticking) return
+		ticking = true
+		requestAnimationFrame(() => {
+			// log("raf")
+			ticking = false
+			if (!playerEl) playerEl = findPlayer()
+			if (!playerEl) return
+
+			// log("scrollY pos:", window.scrollY)
+			// log("triggery:", triggerY)
+			// log("active:", active)
+			// log("closed:", closed)
+
+			if (window.scrollY >= triggerY && !active) {
+				activate(playerEl)
+				return
+			}
+			if (window.scrollY < triggerY) {
+				closed = false
+				if (active) {
+					restore(playerEl)
+					return
+				}
+			}
+		})
+	}
+
+	function main() {
+		log("readying")
+		playerEl = findPlayer()
+		window.addEventListener('scroll', onScroll, { passive: true })
+		window.addEventListener('resize', () => {
+		}, { passive: true })
+		// initial check
+		onScroll()
+	}
+
+	window.addEventListener?.('yt-navigate-finish', () => {
+		closed = false
+		if (active && playerEl) restore(playerEl)
+		playerEl = null
+		setTimeout(() => main(), 300)
+	})
+
+	main()
+})()
