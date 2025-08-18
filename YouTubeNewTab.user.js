@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube New Tab
 // @namespace   Violentmonkey Scripts
-// @version     1.0.8
+// @version     1.0.9
 // @description Always open youtube homepage links in new tab. The homepage takes forever to (properly) load, so just leave it open!
 // @match       https://www.youtube.com/*
 // @grant       none
