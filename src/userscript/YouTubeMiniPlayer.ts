@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   Violentmonkey Scripts
-// @version     1.8
+// @version     1.9
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -9,8 +9,8 @@
 // @author      iamasink
 // @homepage    https://github.com/iamasink/userscripts
 // @supportURL  https://github.com/iamasink/userscripts/issues
-// @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeMiniPlayer.user.js
-// @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeMiniPlayer.user.js
+// @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/dist/YouTubeMiniPlayer.user.js
+// @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/dist/YouTubeMiniPlayer.user.js
 // @tag         tags
 // @icon        https://www.google.com/s2/favicons?domain=youtube.com
 // @license     MIT
