@@ -52,7 +52,11 @@ fs.watch(rootDir, { recursive: true }, (evt, filename) => {
 	if (!filename) return;
 	if (!filename.endsWith(".ts")) return;
 	console.log(`[watch] ${evt}: ${filename}`);
-	buildAll();
+	try {
+		buildAll();
+	} catch (e) {
+		console.log(e);
+	}
 });
 
 console.log("Watching src/ ... Press Ctrl+C to exit");
