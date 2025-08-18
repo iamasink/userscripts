@@ -8,8 +8,8 @@
 // @author      iamasink
 // @homepage    https://github.com/iamasink/userscripts
 // @supportURL  https://github.com/iamasink/userscripts/issues
-// @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeNewTab.user.js
-// @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/YouTubeNewTab.user.js
+// @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/dist/YouTubeNewTab.user.js
+// @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/dist/YouTubeNewTab.user.js
 // @tag         youtube
 // @icon        https://www.google.com/s2/favicons?domain=youtube.com
 // @license     MIT

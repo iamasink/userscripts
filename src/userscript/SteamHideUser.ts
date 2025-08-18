@@ -9,8 +9,8 @@
 // @author       iamasink
 // @homepage     https://github.com/iamasink/userscripts
 // @supportURL   https://github.com/iamasink/userscripts/issues
-// @downloadURL  https://raw.githubusercontent.com/iamasink/userscripts/main/SteamHideUser.user.js
-// @updateURL    https://raw.githubusercontent.com/iamasink/userscripts/main/SteamHideUser.user.js
+// @downloadURL  https://raw.githubusercontent.com/iamasink/userscripts/main/dist/SteamHideUser.user.js
+// @updateURL    https://raw.githubusercontent.com/iamasink/userscripts/main/dist/SteamHideUser.user.js
 // @tag          steam
 // @icon         https://steamcommunity.com/favicon.ico
 // @license      MIT
