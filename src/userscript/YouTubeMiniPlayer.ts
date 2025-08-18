@@ -35,6 +35,8 @@ import type { SettingOption } from '../lib/settingsMenu'
 	let closed = false
 	let triggerY = 500
 
+	let sm: any
+
 	const POSITIONS = ["top-right", "top-left", "bottom-left", "bottom-right"]
 	const SIZES = {
 		"400x225": { width: '400px', height: '225px' },
@@ -53,14 +55,14 @@ import type { SettingOption } from '../lib/settingsMenu'
 		.join("\n")
 	log(sizeClassesCSS)
 
-	const sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
-		{ label: 'Miniplayer Position', type: 'select', choices: POSITIONS, defaultValue: "top-right" },
-		{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
-	])
 
 	function addGlobalListeners() {
 		if (listenersAdded) return
 
+		sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
+			{ label: 'Miniplayer Position', type: 'select', choices: POSITIONS, defaultValue: "top-right" },
+			{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
+		])
 		window.addEventListener('scroll', onScroll, { passive: true })
 		window.addEventListener('resize', onResize, { passive: true })
 		window.addEventListener('yt-navigate-finish', onNavigate)
@@ -250,4 +252,6 @@ ${sizeClassesCSS}
 
 		onScroll()
 	}
+
+	main()
 })()
