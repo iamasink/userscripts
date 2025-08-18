@@ -189,6 +189,7 @@
         logError("no video element");
       }
       if (!e.ctrlKey && (rightMouseDown || !VOLUME_REQUIRES_RCLICK && e.target == video)) {
+        if (!ENABLE_VOLUME_SCROLL) return;
         e.preventDefault();
         wheelUsed = true;
         const currVol = player.getVolume();
@@ -198,6 +199,7 @@
         player.setVolume(nextVol);
         showOverlay("Volume", `${nextVol}%`);
       } else if (e.ctrlKey) {
+        if (!ENABLE_SPEED_SCROLL) return;
         if (SPEED_REQUIRES_RCLICK && !rightMouseDown) return;
         log(e.target);
         if (e.target !== video && !SPEED_REQUIRES_RCLICK) {
