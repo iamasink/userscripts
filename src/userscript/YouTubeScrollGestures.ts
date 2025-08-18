@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @version     1.7
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
-// @match       https://www.youtube.com/watch*
+// @match       https://www.youtube.com/*
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @author      iamasink
@@ -24,7 +24,12 @@ import type { SettingOption } from '../lib/settingsMenu'
 	/////// options ///////
 	const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({})
 
-	// Load saved settings or defaults
+	let listenersAdded = false
+	let rightMouseDown = false
+	let wheelUsed = false
+	let sm: any = null
+
+	// settings
 	const SETTINGS: SettingOption[] = [
 		{ label: 'Reverse Scroll Direction', type: 'checkbox', defaultValue: false },
 		{ type: 'spacer' },
@@ -37,49 +42,60 @@ import type { SettingOption } from '../lib/settingsMenu'
 		{ label: 'Speed Step', type: 'number', defaultValue: 0.05, step: 0.05, min: 0.05, max: 5 },
 	]
 
-	const sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
+	function addGlobalListeners() {
+		if (listenersAdded) return
 
-	///////
+		sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
 
-	let rightMouseDown = false
-	let wheelUsed = false
+		document.addEventListener('mousedown', onMouseDown)
+		document.addEventListener('mouseup', onMouseUp)
+		document.addEventListener('wheel', onWheel, { passive: false })
+		document.addEventListener('contextmenu', onContextMenu, true)
+		window.addEventListener('yt-navigate-finish', onNavigate)
 
-	document.addEventListener('mousedown', e => {
+		listenersAdded = true
+		log("Global listeners added")
+	}
+
+
+	function onMouseDown(e: MouseEvent) {
 		if (e.button === 2) {
 			// rightclick
 			rightMouseDown = true
 			wheelUsed = false
-
 		} else if (e.button === 1) {
 			// middleclick
 			wheelUsed = false
 			if (!(rightMouseDown || e.ctrlKey)) return
-			const player: any = document.querySelector('#movie_player')!
+
+			const player: any = document.querySelector('#movie_player')
+			if (!player) return
+
 			e.preventDefault()
 
 			if (rightMouseDown) {
 				if (player.isMuted()) {
-					showOverlay('Volume', `Unmuted`)
+					showOverlay('Volume', 'Unmuted')
 					player.unMute()
 				} else {
-					showOverlay('Volume', `Mute`)
+					showOverlay('Volume', 'Mute')
 					player.mute()
 				}
 			} else if (e.ctrlKey) {
-				showOverlay('Speed', `1.00x`)
+				showOverlay('Speed', '1.00x')
 				player.setPlaybackRate(1)
 			}
-
 		}
-	})
-	document.addEventListener('mouseup', e => {
+	}
+
+	function onMouseUp(e: MouseEvent) {
 		if (e.button === 2) {
 			rightMouseDown = false
 		}
-	})
+	}
 
-
-	document.addEventListener('wheel', e => {
+	function onWheel(e: WheelEvent) {
+		if (!sm) return
 		const VOLUME_REQUIRES_RCLICK = sm.getSetting("Volume Requires RClick") as boolean
 		const ENABLE_VOLUME_SCROLL = sm.getSetting("Enable Volume Scroll") as boolean
 		const VOLUME_STEP = sm.getSetting("Volume Step") as number
@@ -93,9 +109,11 @@ import type { SettingOption } from '../lib/settingsMenu'
 		const video = document.querySelector('video')!
 		if (!player) {
 			logError("no #movie_player")
+			return
 		}
 		if (!video) {
 			logError("no video element")
+			return
 		}
 
 		if (!e.ctrlKey && (rightMouseDown || (!VOLUME_REQUIRES_RCLICK && e.target == video))) {
@@ -161,20 +179,27 @@ import type { SettingOption } from '../lib/settingsMenu'
 			log("next", nextSpeed)
 			showOverlay('Speed', `${nextSpeed.toFixed(2)}x`)
 		}
-	}, { passive: false })
+	}
 
-	document.addEventListener('contextmenu', e => {
+	function onContextMenu(e: PointerEvent) {
 		if (wheelUsed) {
 			e.preventDefault()
 			e.stopImmediatePropagation()
 			wheelUsed = false
 		}
-	}, true)
+	}
+
+	function onNavigate() {
+		log("Navigation detected")
+		rightMouseDown = false
+		wheelUsed = false
+		setTimeout(() => main(), 100)
+	}
 
 	function showOverlay(type: string, text: string) {
-
 		const id = 'scrollgesture-overlay'
 		let overlay = document.getElementById(id) as any
+
 		if (!overlay) {
 			overlay = document.createElement('div')
 			overlay.id = id
@@ -193,10 +218,21 @@ import type { SettingOption } from '../lib/settingsMenu'
 			})
 			document.body.appendChild(overlay)
 		}
+
 		overlay.textContent = `${type}: ${text}`
 		overlay.style.display = 'block'
 
 		clearTimeout(overlay.hideTimer)
 		overlay.hideTimer = setTimeout(() => overlay.style.display = 'none', 1000)
 	}
+
+	function main() {
+		log("main() called")
+
+		addGlobalListeners()
+
+		log("ready :)")
+	}
+
+	main()
 })()
