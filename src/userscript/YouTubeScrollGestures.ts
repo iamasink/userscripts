@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   Violentmonkey Scripts
-// @version     1.5
+// @version     1.6
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/watch*
 // @grant       GM_getValue
