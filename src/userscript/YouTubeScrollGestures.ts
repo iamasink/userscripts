@@ -17,6 +17,7 @@
 // ==/UserScript==
 
 import { addSettingsMenu } from '../lib/ytSettingsMenu'
+import type { SettingOption } from '../lib/ytSettingsMenu'
 
 (function () {
 
@@ -31,6 +32,34 @@ import { addSettingsMenu } from '../lib/ytSettingsMenu'
 	let ENABLE_VOLUME_SCROLL = GM_getValue('sg-volume-enabled', true)
 	let VOLUME_STEP = parseFloat(GM_getValue('sg-volume-step', "2"))
 	let VOLUME_REQUIRES_RCLICK = GM_getValue('sg-volume-rclick', true)
+
+	const SETTINGS: SettingOption[] = [
+		{
+			label: "Enable Volume Scroll",
+			type: "checkbox", defaultValue: true, onChange: val => { ENABLE_VOLUME_SCROLL = val; GM_setValue('sg-volume-enabled', val) }
+		},
+		{
+			label: 'Volume Step',
+			type: 'number', defaultValue: VOLUME_STEP, onChange: val => { VOLUME_STEP = val; GM_setValue('sg-volume-step', val) }, step: 1, min: 1, max: 25
+		},
+		{
+			label: 'Volume Requires Right-Click',
+			type: 'checkbox', defaultValue: VOLUME_REQUIRES_RCLICK, onChange: val => { VOLUME_REQUIRES_RCLICK = val; GM_setValue('sg-volume-rclick', val) }
+		},
+		{ type: 'spacer' },
+		{
+			label: "Enable Speed Scroll",
+			type: "checkbox", defaultValue: true, onChange: val => { ENABLE_SPEED_SCROLL = val; GM_setValue('sg-speed-enabled', val) }
+		},
+		{
+			label: 'Speed Step',
+			type: 'number', defaultValue: SPEED_STEP, onChange: val => { SPEED_STEP = val; GM_setValue('sg-speed-step', val) }, step: 0.05, min: 0.05, max: 5
+		},
+		{
+			label: 'Speed Requires Right-Click',
+			type: 'checkbox', defaultValue: SPEED_REQUIRES_RCLICK, onChange: val => { SPEED_REQUIRES_RCLICK = val; GM_setValue('sg-speed-rclick', val) }
+		},
+	]
 
 	///////         ///////
 
@@ -202,15 +231,7 @@ import { addSettingsMenu } from '../lib/ytSettingsMenu'
 		const owner = document.getElementById('owner')
 		if (!owner) return
 
-		addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
-			{ label: "Enable Volume Scroll", type: "checkbox", defaultValue: true, onChange: val => { ENABLE_VOLUME_SCROLL = val; GM_setValue('sg-volume-enabled', val) } },
-			{ label: 'Volume Step', type: 'number', defaultValue: VOLUME_STEP, onChange: val => { VOLUME_STEP = val; GM_setValue('sg-volume-step', val) } },
-			{ label: 'Volume Requires Right-Click', type: 'checkbox', defaultValue: VOLUME_REQUIRES_RCLICK, onChange: val => { VOLUME_REQUIRES_RCLICK = val; GM_setValue('sg-volume-rclick', val) } },
-			{ type: 'spacer' },
-			{ label: "Enable Speed Scroll", type: "checkbox", defaultValue: true, onChange: val => { ENABLE_SPEED_SCROLL = val; GM_setValue('sg-speed-enabled', val) } },
-			{ label: 'Speed Step', type: 'number', defaultValue: SPEED_STEP, onChange: val => { SPEED_STEP = val; GM_setValue('sg-speed-step', val) } },
-			{ label: 'Speed Requires Right-Click', type: 'checkbox', defaultValue: SPEED_REQUIRES_RCLICK, onChange: val => { SPEED_REQUIRES_RCLICK = val; GM_setValue('sg-speed-rclick', val) } },
-		])
+		addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
 
 		observer.disconnect()
 	})

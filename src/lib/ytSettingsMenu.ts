@@ -1,6 +1,6 @@
 export type SettingOption =
 	| { label: string; type: 'checkbox'; defaultValue: boolean; onChange: (val: boolean) => void }
-	| { label: string; type: 'number'; defaultValue: number; onChange: (val: number) => void }
+	| { label: string; type: 'number'; defaultValue: number; onChange: (val: number) => void; step?: number; min?: number; max?: number }
 	| { label: string; type: 'text'; defaultValue: string; onChange: (val: string) => void }
 	| { label: string; type: 'select'; defaultValue: string; choices: string[]; onChange: (val: string) => void }
 	| { type: 'spacer' }
@@ -91,15 +91,16 @@ export function addSettingsMenu(SCRIPT_SHORTNAME: string, SCRIPT_NAME = SCRIPT_S
 					break
 
 				}
-			case 'number':
-				{
-					input = document.createElement('input')
-					input.type = 'number'
-					input.value = opt.defaultValue.toString()
-					input.style.width = '50px'
-					break
-
-				}
+			case 'number': {
+				input = document.createElement('input')
+				input.type = 'number'
+				input.value = opt.defaultValue.toString()
+				input.style.width = '60px'
+				if (opt.step !== undefined) input.step = opt.step.toString()
+				if (opt.min !== undefined) input.min = opt.min.toString()
+				if (opt.max !== undefined) input.max = opt.max.toString()
+				break
+			}
 			case 'text':
 				{
 					input = document.createElement('input')

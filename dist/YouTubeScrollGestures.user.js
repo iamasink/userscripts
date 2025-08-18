@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   Violentmonkey Scripts
-// @version     1.0
+// @version     1.1
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/watch*
 // @grant       GM_getValue
@@ -95,7 +95,10 @@
           input = document.createElement("input");
           input.type = "number";
           input.value = opt.defaultValue.toString();
-          input.style.width = "50px";
+          input.style.width = "60px";
+          if (opt.step !== void 0) input.step = opt.step.toString();
+          if (opt.min !== void 0) input.min = opt.min.toString();
+          if (opt.max !== void 0) input.max = opt.max.toString();
           break;
         }
         case "text": {
@@ -142,6 +145,69 @@
     let ENABLE_VOLUME_SCROLL = GM_getValue("sg-volume-enabled", true);
     let VOLUME_STEP = parseFloat(GM_getValue("sg-volume-step", "2"));
     let VOLUME_REQUIRES_RCLICK = GM_getValue("sg-volume-rclick", true);
+    const SETTINGS = [
+      {
+        label: "Enable Volume Scroll",
+        type: "checkbox",
+        defaultValue: true,
+        onChange: (val) => {
+          ENABLE_VOLUME_SCROLL = val;
+          GM_setValue("sg-volume-enabled", val);
+        }
+      },
+      {
+        label: "Volume Step",
+        type: "number",
+        defaultValue: VOLUME_STEP,
+        onChange: (val) => {
+          VOLUME_STEP = val;
+          GM_setValue("sg-volume-step", val);
+        },
+        step: 1,
+        min: 1,
+        max: 25
+      },
+      {
+        label: "Volume Requires Right-Click",
+        type: "checkbox",
+        defaultValue: VOLUME_REQUIRES_RCLICK,
+        onChange: (val) => {
+          VOLUME_REQUIRES_RCLICK = val;
+          GM_setValue("sg-volume-rclick", val);
+        }
+      },
+      { type: "spacer" },
+      {
+        label: "Enable Speed Scroll",
+        type: "checkbox",
+        defaultValue: true,
+        onChange: (val) => {
+          ENABLE_SPEED_SCROLL = val;
+          GM_setValue("sg-speed-enabled", val);
+        }
+      },
+      {
+        label: "Speed Step",
+        type: "number",
+        defaultValue: SPEED_STEP,
+        onChange: (val) => {
+          SPEED_STEP = val;
+          GM_setValue("sg-speed-step", val);
+        },
+        step: 0.05,
+        min: 0.05,
+        max: 5
+      },
+      {
+        label: "Speed Requires Right-Click",
+        type: "checkbox",
+        defaultValue: SPEED_REQUIRES_RCLICK,
+        onChange: (val) => {
+          SPEED_REQUIRES_RCLICK = val;
+          GM_setValue("sg-speed-rclick", val);
+        }
+      }
+    ];
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -271,33 +337,7 @@
     const observer = new MutationObserver(() => {
       const owner = document.getElementById("owner");
       if (!owner) return;
-      addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
-        { label: "Enable Volume Scroll", type: "checkbox", defaultValue: true, onChange: (val) => {
-          ENABLE_VOLUME_SCROLL = val;
-          GM_setValue("sg-volume-enabled", val);
-        } },
-        { label: "Volume Step", type: "number", defaultValue: VOLUME_STEP, onChange: (val) => {
-          VOLUME_STEP = val;
-          GM_setValue("sg-volume-step", val);
-        } },
-        { label: "Volume Requires Right-Click", type: "checkbox", defaultValue: VOLUME_REQUIRES_RCLICK, onChange: (val) => {
-          VOLUME_REQUIRES_RCLICK = val;
-          GM_setValue("sg-volume-rclick", val);
-        } },
-        { type: "spacer" },
-        { label: "Enable Speed Scroll", type: "checkbox", defaultValue: true, onChange: (val) => {
-          ENABLE_SPEED_SCROLL = val;
-          GM_setValue("sg-speed-enabled", val);
-        } },
-        { label: "Speed Step", type: "number", defaultValue: SPEED_STEP, onChange: (val) => {
-          SPEED_STEP = val;
-          GM_setValue("sg-speed-step", val);
-        } },
-        { label: "Speed Requires Right-Click", type: "checkbox", defaultValue: SPEED_REQUIRES_RCLICK, onChange: (val) => {
-          SPEED_REQUIRES_RCLICK = val;
-          GM_setValue("sg-speed-rclick", val);
-        } }
-      ]);
+      addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS);
       observer.disconnect();
     });
     observer.observe(document.body, { childList: true, subtree: true });
