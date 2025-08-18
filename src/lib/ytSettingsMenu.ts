@@ -64,6 +64,7 @@ export function addSettingsMenu(
 			fontSize: '16px',
 			padding: '4px 8px',
 			color: '#fff',
+			background: 'rgba(0,0,0,0.6)',
 			border: 'none',
 			borderRadius: '4px',
 			cursor: 'pointer',
