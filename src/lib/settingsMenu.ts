@@ -210,8 +210,6 @@ export function addSettingsMenu(
 		content.appendChild(wrapper)
 	}
 
-	options.forEach(addOption)
-
 	function getSetting(label: string): boolean | number | string | undefined {
 		const gmKey = `sinkusoption-${SCRIPT_SHORTNAME}-${label.toLowerCase().replace(/\s+/g, '-')}`
 		const opt = options.find(o => 'label' in o && (o as any).label === label) as SettingOption | undefined
@@ -224,6 +222,11 @@ export function addSettingsMenu(
 			return (opt as any).defaultValue
 		}
 	}
+
+
+	// check it doesnt already have a thing
+	const section = document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`)
+	if (!section) options.forEach(addOption)
 
 	return { getSetting }
 }
