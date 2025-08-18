@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   Violentmonkey Scripts
-// @version     1.2
+// @version     1.5
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/watch*
 // @grant       GM_getValue
@@ -39,7 +39,10 @@
         color: "#fff",
         border: "none",
         borderRadius: "4px",
-        cursor: "pointer"
+        cursor: "pointer",
+        width: "40px",
+        height: "36px",
+        marginRight: "8px"
       });
       container.appendChild(cog);
       popup = document.createElement("div");
@@ -60,6 +63,24 @@
         zIndex: "9999"
       });
       container.appendChild(popup);
+      const closebutton = document.createElement("button");
+      closebutton.textContent = "x";
+      Object.assign(closebutton.style, {
+        fontSize: "16px",
+        padding: "4px 8px",
+        color: "#fff",
+        background: "rgba(0,0,0,0.6)",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        position: "absolute",
+        top: "4px",
+        right: "4px"
+      });
+      popup.appendChild(closebutton);
+      closebutton.addEventListener("click", () => {
+        popup.style.display = "none";
+      });
       const header = document.createElement("h3");
       header.textContent = SCRIPT_NAME;
       header.style.margin = "0 0 6px 0";
@@ -79,135 +100,76 @@
         popup.appendChild(spacer);
         return;
       }
-      const id = "sinkusoption-" + SCRIPT_SHORTNAME.toLowerCase() + opt.label.toLowerCase().replace(/\s+/g, "-");
-      if (document.getElementById(id)) return;
+      const gmKey = `sg-${opt.label.toLowerCase().replace(/\s+/g, "-")}`;
+      let value = opt.defaultValue;
+      if (opt.type === "checkbox") value = GM_getValue(gmKey, opt.defaultValue);
+      else if (opt.type === "number") value = parseFloat(GM_getValue(gmKey, opt.defaultValue.toString()));
+      else value = GM_getValue(gmKey, opt.defaultValue);
       const wrapper = document.createElement("label");
       wrapper.style.display = "block";
       let input;
       switch (opt.type) {
-        case "checkbox": {
+        case "checkbox":
           input = document.createElement("input");
           input.type = "checkbox";
-          input.checked = opt.defaultValue;
+          input.checked = value;
           break;
-        }
-        case "number": {
+        case "number":
           input = document.createElement("input");
           input.type = "number";
-          input.value = opt.defaultValue.toString();
+          input.value = value.toString();
           input.style.width = "60px";
-          if (opt.step !== void 0) input.step = opt.step.toString();
-          if (opt.min !== void 0) input.min = opt.min.toString();
-          if (opt.max !== void 0) input.max = opt.max.toString();
+          if ("step" in opt && opt.step !== void 0) input.step = opt.step.toString();
+          if ("min" in opt && opt.min !== void 0) input.min = opt.min.toString();
+          if ("max" in opt && opt.max !== void 0) input.max = opt.max.toString();
           break;
-        }
-        case "text": {
+        case "text":
           input = document.createElement("input");
           input.type = "text";
-          input.value = opt.defaultValue;
+          input.value = value;
           input.style.width = "100%";
           break;
-        }
-        case "select": {
+        case "select":
           const select = document.createElement("select");
           opt.choices.forEach((choice) => {
             const optionEl = document.createElement("option");
             optionEl.value = choice;
             optionEl.textContent = choice;
-            if (choice === opt.defaultValue) optionEl.selected = true;
+            if (choice === value) optionEl.selected = true;
             select.appendChild(optionEl);
           });
           input = select;
           break;
-        }
       }
-      input.id = id;
+      input.id = `sinkusoption-${gmKey}`;
       input.addEventListener("change", (e) => {
-        let val;
-        if (opt.type === "checkbox") val = e.target.checked;
-        else if (opt.type === "number") val = parseFloat(e.target.value);
-        else val = e.target.value;
-        opt.onChange(val);
+        let newVal;
+        if (opt.type === "checkbox") newVal = e.target.checked;
+        else if (opt.type === "number") newVal = parseFloat(e.target.value);
+        else newVal = e.target.value;
+        GM_setValue(gmKey, newVal);
       });
       wrapper.appendChild(input);
-      if ("label" in opt) wrapper.append(" " + opt.label);
+      wrapper.append(" " + opt.label);
       popup.appendChild(wrapper);
     }
     options.forEach(addOption);
+    function getSetting(label) {
+      const gmKey = `sg-${label.toLowerCase().replace(/\s+/g, "-")}`;
+      const opt = options.find((o) => "label" in o && o.label === label);
+      if (!opt) throw new Error(`Setting not found: ${label}`);
+      if (opt.type === "checkbox") return GM_getValue(gmKey, opt.defaultValue);
+      if (opt.type === "number") return parseFloat(GM_getValue(gmKey, opt.defaultValue.toString()));
+      if (opt.type != "spacer") {
+        return GM_getValue(gmKey, opt.defaultValue);
+      }
+    }
+    return { getSetting };
   }
 
   // src/userscript/YouTubeScrollGestures.ts
   (function() {
     const LOGGING_ENABLED = true;
-    let ENABLE_SPEED_SCROLL = GM_getValue("sg-speed-enabled", true);
-    let SPEED_STEP = parseFloat(GM_getValue("sg-speed-step", "0.05"));
-    let SPEED_REQUIRES_RCLICK = GM_getValue("sg-speed-rclick", false);
-    let ENABLE_VOLUME_SCROLL = GM_getValue("sg-volume-enabled", true);
-    let VOLUME_STEP = parseFloat(GM_getValue("sg-volume-step", "2"));
-    let VOLUME_REQUIRES_RCLICK = GM_getValue("sg-volume-rclick", true);
-    const SETTINGS = [
-      {
-        label: "Enable Volume Scroll",
-        type: "checkbox",
-        defaultValue: true,
-        onChange: (val) => {
-          ENABLE_VOLUME_SCROLL = val;
-          GM_setValue("sg-volume-enabled", val);
-        }
-      },
-      {
-        label: "Volume Step",
-        type: "number",
-        defaultValue: VOLUME_STEP,
-        onChange: (val) => {
-          VOLUME_STEP = val;
-          GM_setValue("sg-volume-step", val);
-        },
-        step: 1,
-        min: 1,
-        max: 25
-      },
-      {
-        label: "Volume Requires Right-Click",
-        type: "checkbox",
-        defaultValue: VOLUME_REQUIRES_RCLICK,
-        onChange: (val) => {
-          VOLUME_REQUIRES_RCLICK = val;
-          GM_setValue("sg-volume-rclick", val);
-        }
-      },
-      { type: "spacer" },
-      {
-        label: "Enable Speed Scroll",
-        type: "checkbox",
-        defaultValue: true,
-        onChange: (val) => {
-          ENABLE_SPEED_SCROLL = val;
-          GM_setValue("sg-speed-enabled", val);
-        }
-      },
-      {
-        label: "Speed Step",
-        type: "number",
-        defaultValue: SPEED_STEP,
-        onChange: (val) => {
-          SPEED_STEP = val;
-          GM_setValue("sg-speed-step", val);
-        },
-        step: 0.05,
-        min: 0.05,
-        max: 5
-      },
-      {
-        label: "Speed Requires Right-Click",
-        type: "checkbox",
-        defaultValue: SPEED_REQUIRES_RCLICK,
-        onChange: (val) => {
-          SPEED_REQUIRES_RCLICK = val;
-          GM_setValue("sg-speed-rclick", val);
-        }
-      }
-    ];
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -216,6 +178,18 @@
     const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
     const logError = (...args) => console.error(LOG_PREFIX, ...args);
     console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+    const SETTINGS = [
+      { label: "Reverse Scroll Direction", type: "checkbox", defaultValue: false },
+      { type: "spacer" },
+      { label: "Enable Volume Scroll", type: "checkbox", defaultValue: true },
+      { label: "Volume Requires RClick", type: "checkbox", defaultValue: true },
+      { label: "Volume Step", type: "number", defaultValue: 2, step: 1, min: 1, max: 25 },
+      { type: "spacer" },
+      { label: "Enable Speed Scroll", type: "checkbox", defaultValue: true },
+      { label: "Speed Requires RClick", type: "checkbox", defaultValue: false },
+      { label: "Speed Step", type: "number", defaultValue: 0.05, step: 0.05, min: 0.05, max: 5 }
+    ];
+    const sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS);
     let rightMouseDown = false;
     let wheelUsed = false;
     document.addEventListener("mousedown", (e) => {
@@ -246,6 +220,13 @@
       }
     });
     document.addEventListener("wheel", (e) => {
+      const VOLUME_REQUIRES_RCLICK = sm.getSetting("Volume Requires RClick");
+      const ENABLE_VOLUME_SCROLL = sm.getSetting("Enable Volume Scroll");
+      const VOLUME_STEP = sm.getSetting("Volume Step");
+      const ENABLE_SPEED_SCROLL = sm.getSetting("Enable Speed Scroll");
+      const SPEED_REQUIRES_RCLICK = sm.getSetting("Speed Requires RClick");
+      const SPEED_STEP = sm.getSetting("Speed Step");
+      const REVERSE_SCROLL_DIRECTION = sm.getSetting("Reverse Scroll Direction") ? -1 : 1;
       const player = document.querySelector("#movie_player");
       const video = document.querySelector("video");
       if (!player) {
@@ -259,7 +240,7 @@
         e.preventDefault();
         wheelUsed = true;
         const currVol = player.getVolume();
-        const delta = Math.sign(e.deltaY);
+        const delta = Math.sign(e.deltaY) * REVERSE_SCROLL_DIRECTION;
         const nextVol = delta < 0 ? Math.min(currVol + VOLUME_STEP, 100) : Math.max(currVol - VOLUME_STEP, 0);
         player.unMute();
         player.setVolume(nextVol);
@@ -284,7 +265,7 @@
           currSpeed = 1;
         }
         log("curr", currSpeed);
-        const delta = Math.sign(e.deltaY);
+        const delta = Math.sign(e.deltaY) * REVERSE_SCROLL_DIRECTION;
         let nextSpeed = currSpeed + (delta < 0 ? SPEED_STEP : -SPEED_STEP);
         nextSpeed = Math.max(0.1, Math.min(nextSpeed, 5));
         if (nextSpeed < 0.25) {
