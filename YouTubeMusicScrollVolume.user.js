@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Music Scroll volume change
 // @namespace   Violentmonkey Scripts
-// @version     1.0
+// @version     1.1.0
 // @description Use scroll wheel to change volume anywhere on YouTube Music
 // @match       https://music.youtube.com/*
 // @grant       none
@@ -41,22 +41,22 @@
 
 	let volumeSliderTimeout;
 
-	addEventListener("wheel", (event) => {
+	addEventListener("wheel", (e) => {
 		// log(event)
 
-		// ignore ctrl+scroll zooms
-		if (event.ctrlKey) return;
+		// ignore other keys (zoom, other extensions, etc idk)
+		if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
 
 		// ignore if over scrollable element
-		if (isInsideScrollable(event.target)) return;
+		if (isInsideScrollable(e.target)) return;
 
 		const player = document.querySelector('#movie_player');
 		if (!player) {
-			logwarn("no player. is the page still loading?");
+			logWarn("no player. is the page still loading?");
 			return;
 		}
 
-		const delta = Math.sign(-event.deltaY);
+		const delta = Math.sign(-e.deltaY);
 		const step = 2;
 
 		try {
