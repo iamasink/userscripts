@@ -51,11 +51,13 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 			wheelUsed = false
 
 		} else if (e.button === 1) {
-			const player: any = document.querySelector('#movie_player')!
 			// middleclick
 			wheelUsed = false
+			if (!(rightMouseDown || e.ctrlKey)) return
+			const player: any = document.querySelector('#movie_player')!
+			e.preventDefault()
+
 			if (rightMouseDown) {
-				e.preventDefault()
 				if (player.isMuted()) {
 					showOverlay('Volume', `Unmuted`)
 					player.unMute()
@@ -64,10 +66,10 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 					player.mute()
 				}
 			} else if (e.ctrlKey) {
-				e.preventDefault()
 				showOverlay('Speed', `1.00x`)
 				player.setPlaybackRate(1)
 			}
+
 		}
 	})
 	document.addEventListener('mouseup', e => {
@@ -75,7 +77,6 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 			rightMouseDown = false
 		}
 	})
-
 
 
 	document.addEventListener('wheel', e => {
