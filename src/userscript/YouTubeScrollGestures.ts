@@ -17,8 +17,8 @@
 // ==/UserScript==
 
 import { init } from '../lib/init'
-import { addSettingsMenu } from '../lib/ytSettingsMenu'
-import type { SettingOption } from '../lib/ytSettingsMenu'
+import { addSettingsMenu } from '../lib/settingsMenu'
+import type { SettingOption } from '../lib/settingsMenu'
 
 (function () {
 	/////// options ///////
@@ -199,13 +199,4 @@ import type { SettingOption } from '../lib/ytSettingsMenu'
 		clearTimeout(overlay.hideTimer)
 		overlay.hideTimer = setTimeout(() => overlay.style.display = 'none', 1000)
 	}
-
-	const observer = new MutationObserver(() => {
-		const owner = document.getElementById('owner')
-		if (!owner) return
-
-		addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
-		observer.disconnect()
-	})
-	observer.observe(document.body, { childList: true, subtree: true })
 })()
