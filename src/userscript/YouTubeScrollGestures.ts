@@ -97,6 +97,7 @@ import { addSettingsMenu } from '../lib/ytSettingsMenu'
 		}
 
 		if (!e.ctrlKey && (rightMouseDown || (!VOLUME_REQUIRES_RCLICK && e.target == video))) {
+			if (!ENABLE_VOLUME_SCROLL) return
 			e.preventDefault()
 			wheelUsed = true
 
@@ -109,6 +110,7 @@ import { addSettingsMenu } from '../lib/ytSettingsMenu'
 
 		}
 		else if (e.ctrlKey) {
+			if (!ENABLE_SPEED_SCROLL) return
 			if (SPEED_REQUIRES_RCLICK && !rightMouseDown) return
 
 			log(e.target)
