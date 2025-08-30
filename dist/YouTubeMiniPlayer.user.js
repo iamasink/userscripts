@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   Violentmonkey Scripts
-// @version     1.9
+// @version     1.10
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -272,7 +272,6 @@
         { label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
       ]);
       window.addEventListener("scroll", onScroll, { passive: true });
-      window.addEventListener("resize", onResize, { passive: true });
       window.addEventListener("yt-navigate-finish", onNavigate);
       listenersAdded = true;
       log("Global listeners added");
