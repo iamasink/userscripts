@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name        YouTube Mix to YT Music 2
+// @name        YouTube Mix to YT Music
 // @namespace   Violentmonkey Scripts
-// @version     1.0
-// @description Redirect to youtube music if youtube will put us into a mix playlist
+// @version     1.1
+// @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
 // @grant       window.close
 // @author      iamasink

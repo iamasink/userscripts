@@ -8,10 +8,10 @@ These were made for [Violentmonkey](https://violentmonkey.github.io/) so might n
 
 [Install](dist/YouTubeNewTab.user.js?raw=1)
 
-## YouTubeMixToMusicButton.user.js
-> Add a button to open current YouTube Mix in YouTube Music  
+## YouTubeMixToMusic.user.js
+> Redirect to YouTube music if next up is a Mix  
 
-[Install](dist/YouTubeMixToMusicButton.user.js?raw=1)
+[Install](dist/YouTubeMixToMusic.user.js?raw=1)
 
 ## YouTubeScrollGestures.user.js
 > Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"  
