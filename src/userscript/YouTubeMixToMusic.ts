@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
 // @namespace   https://userscripts.iamas.ink
-// @version     1.3
+// @version     1.3.1
 // @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
 // @match       https://music.youtube.com/*
@@ -65,6 +65,7 @@ import { init } from "../lib/init"
 			const savedVol: number = await GM.getValue("ytVolume")
 			log("saved volume is ", savedVol)
 			if (savedVol) player.setVolume(savedVol)
+			GM.setValue("ytVolume", null)
 
 			return true
 		}
