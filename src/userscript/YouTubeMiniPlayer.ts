@@ -61,7 +61,7 @@ import type { SettingOption } from '../lib/settingsMenu'
 
 		sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
 			{ label: 'Miniplayer Position', type: 'select', choices: POSITIONS, defaultValue: "top-right" },
-			{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
+			{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "400x225" }
 		])
 		window.addEventListener('scroll', onScroll, { passive: true })
 		// window.addEventListener('resize', onResize, { passive: true })
