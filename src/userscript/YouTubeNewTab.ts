@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube New Tab
 // @namespace   https://userscripts.iamas.ink
-// @version     1.0.9
+// @version     1.1
 // @description Always open youtube homepage links in new tab. The homepage takes forever to (properly) load, so just leave it open!
 // @match       https://www.youtube.com/*
 // @grant       none
@@ -15,6 +15,8 @@
 // @license     MIT
 // ==/UserScript==
 
+import { init } from "../lib/init"
+
 
 (function () {
 	/////// options ///////
@@ -23,19 +25,7 @@
 
 	///////         ///////
 
-	// script full name from @name
-	const SCRIPT_NAME = GM_info.script.name
-	// script short name from updateurl filename
-	const SCRIPT_SHORTNAME = GM_info.script.updateURL!.split("/").slice(-1)[0].split(".").slice(0, -2).join(".")
-	// script version
-	const SCRIPT_VERSION = GM_info.script.version
-
-	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`
-	const log = (...args: any) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args)
-	const logWarn = (...args: any) => console.warn(LOG_PREFIX, ...args)
-	const logError = (...args: any) => console.error(LOG_PREFIX, ...args)
-
-	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`)
+	const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({})
 
 	///////
 
