@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
-// @namespace   Violentmonkey Scripts
-// @version     1.1
+// @namespace   https://userscripts.iamas.ink
+// @version     1.2
 // @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
+// @match       https://music.youtube.com/*
 // @grant       window.close
+// @grant       GM.getValue
+// @grant       GM.setValue
 // @author      iamasink
 // @homepage    https://github.com/iamasink/userscripts
 // @supportURL  https://github.com/iamasink/userscripts/issues
@@ -22,13 +25,10 @@ import { init } from "../lib/init"
 	/////// options ///////
 	const LOGGING_ENABLED = false
 
-	let LOADTIME_MS = 500
-	let PREFETCHTIME_MS = 100
 
 	///////         ///////
 
 	const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({})
-
 
 	function isMixUrl(url: string): boolean {
 		try {
@@ -48,11 +48,30 @@ import { init } from "../lib/init"
 		return upNextLink ? upNextLink.href : null
 	}
 
-	function setupVideoListener() {
-		if (location.hostname == "music.youtube.com") return
+	async function setupVideoListener() {
+
 		const video = document.querySelector<HTMLVideoElement>("video")
+		const player: any = document.querySelector('#movie_player')
+
+		if (!player) {
+			logWarn("no player")
+			return false
+		}
+		// log("got video", video)
+		log("got player", player)
+
+		if (location.hostname === "music.youtube.com") {
+			log("hi music")
+			const savedVol: number = await GM.getValue("ytVolume")
+			log("saved volume is ", savedVol)
+			if (savedVol) player.setVolume(savedVol)
+
+			return true
+		}
+
 		if (!video) {
-			return
+			logWarn("no video")
+			return false
 		}
 
 		video.addEventListener("ended", () => {
@@ -60,9 +79,15 @@ import { init } from "../lib/init"
 			if (upNext && isMixUrl(upNext)) {
 				const newUrl = upNext.replace("www.youtube.com", "music.youtube.com")
 				let url = new URL(newUrl)
-				url.searchParams.delete("index")
-				url.searchParams.delete("list")
+				let volume = player.getVolume()
+				log("volume is ", volume)
+				GM.setValue("ytVolume", volume)
+				// url.searchParams.delete("index")
+				// const index = Number.parseInt(url.searchParams.get("index")??"0")
+				// url.searchParams.set("index", (index+1).toString())
+				// url.searchParams.delete("list")
 				log("Redirecting to YouTube Music:", url)
+				log("see you there !")
 				window.location.href = url.toString()
 			} else {
 				log("next is not a mix")
@@ -70,18 +95,33 @@ import { init } from "../lib/init"
 		})
 
 		log("Video listener attached")
+		return true
 	}
 
 
-	setupVideoListener()
+	function trySetupVideoListener() {
+		log(new URL(location.href).pathname)
+		if (new URL(location.href).pathname !== "/watch") return
+		const interval = setInterval(async () => {
+			const success = await setupVideoListener()
+			if (success) {
+				clearInterval(interval)
+				log("Video listener successfully attached.")
+			} else {
+				logWarn("Retrying setupVideoListener...")
+			}
+		}, 1000)
+	}
+
+	trySetupVideoListener()
+
+
 
 	let lastUrl = location.href
 	new MutationObserver(() => {
 		if (location.href !== lastUrl) {
 			lastUrl = location.href
-			setTimeout(() => {
-				setupVideoListener()
-			}, 5000)
+			trySetupVideoListener()
 		}
 	}).observe(document.body, { childList: true, subtree: true })
 })()
