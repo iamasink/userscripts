@@ -1,10 +1,8 @@
-
-declare const BUILD_TIME: string
 declare const ENV: string
 /**
  * Initialize script info and logging.
  * @param options Logging options.
- * @param options.LOGGING_ENABLED Enable/disable logging (default: true)
+ * @param options.LOGGING_ENABLED Enable/disable logging
  * @returns Script info and logging functions
  */
 export function init({ LOGGING_ENABLED = ENV === "dev" ? true : false } = {}): {
@@ -30,7 +28,7 @@ export function init({ LOGGING_ENABLED = ENV === "dev" ? true : false } = {}): {
 	const logWarn = (...args: any[]) => console.warn(LOG_PREFIX, ...args)
 	const logError = (...args: any[]) => console.error(LOG_PREFIX, ...args)
 
-	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`)
+	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`,)
 	// console.log(`[${SCRIPT_SHORTNAME}] built @${BUILD_TIME}`)
 
 	return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError }
