@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
 // @namespace   https://userscripts.iamas.ink
-// @version     1.3
+// @version     1.3.1
 // @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
 // @match       https://music.youtube.com/*
@@ -22,7 +22,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -58,7 +58,7 @@
       const video = document.querySelector("video");
       const player = document.querySelector("#movie_player");
       if (!player) {
-        logWarn("no player");
+        log("no player");
         return false;
       }
       log("got player", player);
@@ -67,10 +67,11 @@
         const savedVol = await GM.getValue("ytVolume");
         log("saved volume is ", savedVol);
         if (savedVol) player.setVolume(savedVol);
+        GM.setValue("ytVolume", null);
         return true;
       }
       if (!video) {
-        logWarn("no video");
+        log("no video");
         return false;
       }
       video.addEventListener("ended", () => {
@@ -100,7 +101,7 @@
           clearInterval(interval);
           log("Video listener successfully attached.");
         } else {
-          logWarn("Retrying setupVideoListener...");
+          log("Retrying setupVideoListener...");
         }
       }, 1e3);
     }

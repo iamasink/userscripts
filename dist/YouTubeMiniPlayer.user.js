@@ -20,7 +20,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -33,7 +33,7 @@
   }
 
   // src/lib/util.ts
-  function waitForElement(selector, interval = 100, timeout = 5e3) {
+  function waitForElement(selector, interval = 100, timeout = 1e3) {
     return new Promise((resolve) => {
       const start = Date.now();
       const check = () => {
@@ -50,11 +50,11 @@
   var SHARED_POPUP_ID = "sinkusoption-popup";
   var SHARED_CONTAINER_ID = "sinkusoption-container";
   var SHARED_COG_ID = "sinkusoption-cog";
-  function addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME = SCRIPT_SHORTNAME, options, ownerElement = "#owner") {
+  function addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME = SCRIPT_SHORTNAME, options, ownerElement = "#owner", location = "below") {
     async function ensureOptionsMenu() {
-      let popup = await waitForElement("#sinkusoption-popup", 100, 5e3);
+      let popup = await waitForElement("#sinkusoption-popup", 100, 1e3);
       if (popup) return popup;
-      const owner = await waitForElement(ownerElement);
+      const owner = await waitForElement(ownerElement, 100, 5e3);
       if (!owner) return null;
       let container = document.getElementById(SHARED_CONTAINER_ID);
       if (!container) {
@@ -84,7 +84,6 @@
         Object.assign(popup.style, {
           display: "none",
           position: "absolute",
-          top: "100%",
           left: "0",
           marginTop: "4px",
           padding: "12px",
@@ -96,6 +95,20 @@
           boxShadow: "0 0 8px rgba(0,0,0,0.7)",
           zIndex: "9999"
         });
+        switch (location) {
+          case "below": {
+            Object.assign(popup.style, {
+              top: "100%"
+            });
+            break;
+          }
+          case "above": {
+            Object.assign(popup.style, {
+              bottom: "100%"
+            });
+            break;
+          }
+        }
         container.appendChild(popup);
         const closebutton = document.createElement("button");
         closebutton.textContent = "x";
@@ -112,11 +125,15 @@
           right: "6px"
         });
         popup.appendChild(closebutton);
-        closebutton.addEventListener("click", () => {
+        closebutton.addEventListener("click", (e) => {
           popup.style.display = "none";
+          e.preventDefault();
+          e.stopImmediatePropagation();
         });
-        cog.addEventListener("click", () => {
+        cog.addEventListener("click", (e) => {
           popup.style.display = popup.style.display === "none" ? "block" : "none";
+          e.preventDefault();
+          e.stopImmediatePropagation();
         });
       }
       return popup;

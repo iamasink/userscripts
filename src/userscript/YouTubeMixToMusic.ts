@@ -54,7 +54,7 @@ import { init } from "../lib/init"
 		const player: any = document.querySelector('#movie_player')
 
 		if (!player) {
-			logWarn("no player")
+			log("no player")
 			return false
 		}
 		// log("got video", video)
@@ -71,7 +71,7 @@ import { init } from "../lib/init"
 		}
 
 		if (!video) {
-			logWarn("no video")
+			log("no video")
 			return false
 		}
 
@@ -109,7 +109,7 @@ import { init } from "../lib/init"
 				clearInterval(interval)
 				log("Video listener successfully attached.")
 			} else {
-				logWarn("Retrying setupVideoListener...")
+				log("Retrying setupVideoListener...")
 			}
 		}, 1000)
 	}
