@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
 // @namespace   https://userscripts.iamas.ink
-// @version     1.2
+// @version     1.3
 // @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
 // @match       https://music.youtube.com/*
