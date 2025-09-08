@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   https://userscripts.iamas.ink
-// @version     1.12
+// @version     1.13
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @match       https://music.youtube.com/*
