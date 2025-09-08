@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
-// @namespace   Violentmonkey Scripts
-// @version     1.1
+// @namespace   https://userscripts.iamas.ink
+// @version     1.2
 // @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
+// @match       https://music.youtube.com/*
 // @grant       window.close
+// @grant       GM.getValue
+// @grant       GM.setValue
 // @author      iamasink
 // @homepage    https://github.com/iamasink/userscripts
 // @supportURL  https://github.com/iamasink/userscripts/issues
@@ -19,7 +22,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -34,8 +37,6 @@
   // src/userscript/YouTubeMixToMusic.ts
   (function() {
     const LOGGING_ENABLED = false;
-    let LOADTIME_MS = 500;
-    let PREFETCHTIME_MS = 100;
     const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({});
     function isMixUrl(url) {
       try {
@@ -53,35 +54,62 @@
       );
       return upNextLink ? upNextLink.href : null;
     }
-    function setupVideoListener() {
-      if (location.hostname == "music.youtube.com") return;
+    async function setupVideoListener() {
       const video = document.querySelector("video");
+      const player = document.querySelector("#movie_player");
+      if (!player) {
+        logWarn("no player");
+        return false;
+      }
+      log("got player", player);
+      if (location.hostname === "music.youtube.com") {
+        log("hi music");
+        const savedVol = await GM.getValue("ytVolume");
+        log("saved volume is ", savedVol);
+        if (savedVol) player.setVolume(savedVol);
+        return true;
+      }
       if (!video) {
-        return;
+        logWarn("no video");
+        return false;
       }
       video.addEventListener("ended", () => {
         const upNext = getUpNextUrl();
         if (upNext && isMixUrl(upNext)) {
           const newUrl = upNext.replace("www.youtube.com", "music.youtube.com");
           let url = new URL(newUrl);
-          url.searchParams.delete("index");
-          url.searchParams.delete("list");
+          let volume = player.getVolume();
+          log("volume is ", volume);
+          GM.setValue("ytVolume", volume);
           log("Redirecting to YouTube Music:", url);
+          log("see you there !");
           window.location.href = url.toString();
         } else {
           log("next is not a mix");
         }
       });
       log("Video listener attached");
+      return true;
     }
-    setupVideoListener();
+    function trySetupVideoListener() {
+      log(new URL(location.href).pathname);
+      if (new URL(location.href).pathname !== "/watch") return;
+      const interval = setInterval(async () => {
+        const success = await setupVideoListener();
+        if (success) {
+          clearInterval(interval);
+          log("Video listener successfully attached.");
+        } else {
+          logWarn("Retrying setupVideoListener...");
+        }
+      }, 1e3);
+    }
+    trySetupVideoListener();
     let lastUrl = location.href;
     new MutationObserver(() => {
       if (location.href !== lastUrl) {
         lastUrl = location.href;
-        setTimeout(() => {
-          setupVideoListener();
-        }, 5e3);
+        trySetupVideoListener();
       }
     }).observe(document.body, { childList: true, subtree: true });
   })();

@@ -149,15 +149,15 @@ ${sizeClassesCSS}
 	function activate(target: HTMLElement) {
 		log("activating")
 		if (!target || closed || target.classList.contains(MINI_CLASS)) {
-			log("no")
+			// log("no")
 			return
 		}
 		const pos = sm.getSetting("Miniplayer Position")
-		log("pos", pos)
+		// log("pos", pos)
 
 		Object.keys(SIZES).forEach(k => target.classList.remove(`${MINI_SIZE_CLASS_PREFIX}-${k}`))
 		const size = sm.getSetting("Miniplayer Size") as keyof typeof SIZES
-		log("size", size)
+		// log("size", size)
 
 		for (let i = 0, len = POSITIONS.length; i < len; i++) {
 			target.classList.remove(`${MINI_POS_CLASS_PREFIX}-${POSITIONS[i]}`)
@@ -208,19 +208,21 @@ ${sizeClassesCSS}
 
 
 	function onScroll() {
-		log("scroll")
+		// log("scroll")
 		if (ticking) return
 		ticking = true
 		requestAnimationFrame(() => {
-			// log("raf")
 			ticking = false
 			if (!playerEl) playerEl = findPlayer()
 			if (!playerEl) return
 
-			// log("scrollY pos:", window.scrollY)
-			// log("triggery:", triggerY)
-			// log("active:", active)
-			// log("closed:", closed)
+			if (new URL(window.location.href).pathname != "/watch") {
+				// we're not on a video page!
+				if (active) {
+					restore(playerEl)
+				}
+				return
+			}
 
 			if (window.scrollY >= triggerY && !active) {
 				activate(playerEl)
@@ -238,7 +240,7 @@ ${sizeClassesCSS}
 
 
 	function main() {
-		log("main() called")
+		// log("main() called")
 
 		injectCSS()
 

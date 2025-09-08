@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        YouTube Popup Player
-// @namespace   Violentmonkey Scripts
+// @namespace   https://userscripts.iamas.ink
 // @version     1.10
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
@@ -20,7 +20,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -269,7 +269,7 @@
       if (listenersAdded) return;
       sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
         { label: "Miniplayer Position", type: "select", choices: POSITIONS, defaultValue: "top-right" },
-        { label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "360x200" }
+        { label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "400x225" }
       ]);
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("yt-navigate-finish", onNavigate);
@@ -350,14 +350,11 @@ ${sizeClassesCSS}
     function activate(target) {
       log("activating");
       if (!target || closed || target.classList.contains(MINI_CLASS)) {
-        log("no");
         return;
       }
       const pos = sm.getSetting("Miniplayer Position");
-      log("pos", pos);
       Object.keys(SIZES).forEach((k) => target.classList.remove(`${MINI_SIZE_CLASS_PREFIX}-${k}`));
       const size = sm.getSetting("Miniplayer Size");
-      log("size", size);
       for (let i = 0, len = POSITIONS.length; i < len; i++) {
         target.classList.remove(`${MINI_POS_CLASS_PREFIX}-${POSITIONS[i]}`);
       }
@@ -393,13 +390,18 @@ ${sizeClassesCSS}
       active = false;
     }
     function onScroll() {
-      log("scroll");
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
         if (!playerEl) playerEl = findPlayer();
         if (!playerEl) return;
+        if (new URL(window.location.href).pathname != "/watch") {
+          if (active) {
+            restore(playerEl);
+          }
+          return;
+        }
         if (window.scrollY >= triggerY && !active) {
           activate(playerEl);
           return;
@@ -414,7 +416,6 @@ ${sizeClassesCSS}
       });
     }
     function main() {
-      log("main() called");
       injectCSS();
       addGlobalListeners();
       playerEl = findPlayer();

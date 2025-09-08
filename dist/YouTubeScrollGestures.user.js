@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
-// @namespace   Violentmonkey Scripts
+// @namespace   https://userscripts.iamas.ink
 // @version     1.11
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
@@ -20,7 +20,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
