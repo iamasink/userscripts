@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Music Scroll volume change
 // @namespace   https://userscripts.iamas.ink
-// @version     1.1.0
+// @version     1.2
 // @description Use scroll wheel to change volume anywhere on YouTube Music
 // @match       https://music.youtube.com/*
 // @grant       none
@@ -32,8 +32,6 @@ import { init } from "../lib/init"
 	let volumeSliderTimeout: number | undefined
 
 	addEventListener("wheel", (e) => {
-		log(e)
-
 		// ignore other keys (zoom, other extensions, etc idk)
 		if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return
 		// ignore if there are clicks
