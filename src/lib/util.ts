@@ -1,4 +1,4 @@
-export function waitForElement(selector: string, interval = 100, timeout = 5000): Promise<HTMLElement | null> {
+export function waitForElement(selector: string, interval = 100, timeout = 1000): Promise<HTMLElement | null> {
 	return new Promise(resolve => {
 		const start = Date.now()
 		const check = () => {
