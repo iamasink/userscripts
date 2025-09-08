@@ -113,6 +113,10 @@ export function addSettingsMenu(
 				e.preventDefault()
 				e.stopImmediatePropagation()
 			})
+			popup.addEventListener("click", (e) => {
+				// prevent interaction with the page
+				e.stopPropagation()
+			})
 		}
 
 		return popup as HTMLElement | null
@@ -206,7 +210,7 @@ export function addSettingsMenu(
 			input.type = 'text';
 			(input as HTMLInputElement).value = String(value)
 			input.style.width = '100%'
-		} else { // select
+		} else if (opt.type === "select") { // select
 			const select = document.createElement('select')
 			opt.choices.forEach(choice => {
 				const optionEl = document.createElement('option')
@@ -217,6 +221,11 @@ export function addSettingsMenu(
 			})
 			input = select
 			input.style.minWidth = '120px'
+		} else {
+			//unknown
+			const unknownOpt = opt as { type?: unknown }
+			console.error(`[iamasink userscript settings] unknown opt.type ${unknownOpt.type} !!`)
+			return
 		}
 
 		input.addEventListener('change', (e) => {
