@@ -16,14 +16,15 @@ export function addSettingsMenu(
 	SCRIPT_SHORTNAME: string,
 	SCRIPT_NAME = SCRIPT_SHORTNAME,
 	options: SettingOption[],
-	ownerElement: string = '#owner'
+	ownerElement: string = '#owner',
+	location: "above" | "below" = "below",
 ) {
 	async function ensureOptionsMenu(): Promise<HTMLElement | null> {
 		// maybe scuffed i do not care
-		let popup = await waitForElement('#sinkusoption-popup', 100, 5000)
+		let popup = await waitForElement('#sinkusoption-popup', 100, 1000)
 		if (popup) return popup
 
-		const owner = (await waitForElement(ownerElement))
+		const owner = (await waitForElement(ownerElement, 100, 5000))
 		if (!owner) return null
 
 		let container = document.getElementById(SHARED_CONTAINER_ID)
@@ -56,7 +57,6 @@ export function addSettingsMenu(
 			Object.assign(popup.style, {
 				display: 'none',
 				position: 'absolute',
-				top: '100%',
 				left: '0',
 				marginTop: '4px',
 				padding: '12px',
@@ -68,6 +68,23 @@ export function addSettingsMenu(
 				boxShadow: '0 0 8px rgba(0,0,0,0.7)',
 				zIndex: '9999',
 			})
+
+			switch (location) {
+				case "below": {
+					Object.assign(popup.style, {
+						top: '100%',
+
+					})
+					break
+				}
+				case "above": {
+					Object.assign(popup.style, {
+						bottom: '100%',
+
+					})
+					break
+				}
+			}
 			container.appendChild(popup)
 
 			const closebutton = document.createElement('button')
@@ -85,10 +102,16 @@ export function addSettingsMenu(
 				right: '6px'
 			})
 			popup.appendChild(closebutton)
-			closebutton.addEventListener('click', () => { popup!.style.display = 'none' })
+			closebutton.addEventListener('click', (e) => {
+				popup!.style.display = 'none'
+				e.preventDefault()
+				e.stopImmediatePropagation()
+			})
 
-			cog.addEventListener('click', () => {
+			cog.addEventListener('click', (e) => {
 				popup!.style.display = popup!.style.display === 'none' ? 'block' : 'none'
+				e.preventDefault()
+				e.stopImmediatePropagation()
 			})
 		}
 
