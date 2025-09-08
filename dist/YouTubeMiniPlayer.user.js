@@ -135,6 +135,9 @@
           e.preventDefault();
           e.stopImmediatePropagation();
         });
+        popup.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
       }
       return popup;
     }
@@ -211,7 +214,7 @@
         input.type = "text";
         input.value = String(value);
         input.style.width = "100%";
-      } else {
+      } else if (opt.type === "select") {
         const select = document.createElement("select");
         opt.choices.forEach((choice) => {
           const optionEl = document.createElement("option");
@@ -222,6 +225,10 @@
         });
         input = select;
         input.style.minWidth = "120px";
+      } else {
+        const unknownOpt = opt;
+        console.error(`[iamasink userscript settings] unknown opt.type ${unknownOpt.type} !!`);
+        return;
       }
       input.addEventListener("change", (e) => {
         let newVal;

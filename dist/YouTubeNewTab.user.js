@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube New Tab
 // @namespace   https://userscripts.iamas.ink
-// @version     1.0.9
+// @version     1.1
 // @description Always open youtube homepage links in new tab. The homepage takes forever to (properly) load, so just leave it open!
 // @match       https://www.youtube.com/*
 // @grant       none
@@ -18,17 +18,23 @@
 
 "use strict";
 (() => {
-  // src/userscript/YouTubeNewTab.ts
-  (function() {
-    const LOGGING_ENABLED = false;
+  // src/lib/init.ts
+  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
-    const SCRIPT_SHORTNAME = GM_info.script.updateURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".");
+    const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
     const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
     const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
     const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
     const logError = (...args) => console.error(LOG_PREFIX, ...args);
     console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError };
+  }
+
+  // src/userscript/YouTubeNewTab.ts
+  (function() {
+    const LOGGING_ENABLED = false;
+    const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({});
     const selector = 'a[href*="youtube.com/watch"], a[href*="youtu.be"], a[href^="/watch"]';
     document.addEventListener("click", interceptClick, true);
     log("Click interceptor attached");
