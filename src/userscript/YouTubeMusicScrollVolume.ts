@@ -15,6 +15,8 @@
 // @license     MIT
 // ==/UserScript==
 
+import { init } from "../lib/init"
+
 
 (function () {
 	/////// options ///////
@@ -23,29 +25,19 @@
 
 	///////         ///////
 
-	// script full name from @name
-	const SCRIPT_NAME = GM_info.script.name
-	// script short name from updateurl filename
-	const SCRIPT_SHORTNAME = GM_info.script.updateURL!.split("/").slice(-1)[0].split(".").slice(0, -2).join(".")
-	// script version
-	const SCRIPT_VERSION = GM_info.script.version
-
-	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`
-	const log = (...args: any) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args)
-	const logWarn = (...args: any) => console.warn(LOG_PREFIX, ...args)
-	const logError = (...args: any) => console.error(LOG_PREFIX, ...args)
-
-	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`)
+	const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({})
 
 	////////////////
 
 	let volumeSliderTimeout: number | undefined
 
 	addEventListener("wheel", (e) => {
-		// log(event)
+		log(e)
 
 		// ignore other keys (zoom, other extensions, etc idk)
 		if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return
+		// ignore if there are clicks
+		if (e.buttons > 0) return
 
 		// ignore if over scrollable element
 		if (isInsideScrollable(e.target)) return
