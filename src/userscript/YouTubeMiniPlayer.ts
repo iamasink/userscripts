@@ -53,7 +53,7 @@ import type { SettingOption } from '../lib/settingsMenu'
 	const sizeClassesCSS = Object.entries(SIZES)
 		.map(([key, val]) => `.${MINI_CLASS}.${MINI_SIZE_CLASS_PREFIX}-${key}{width:${val.width} !important;height:${val.height} !important;}`)
 		.join("\n")
-	log(sizeClassesCSS)
+	// log(sizeClassesCSS)
 
 
 	function addGlobalListeners() {
@@ -75,7 +75,7 @@ import type { SettingOption } from '../lib/settingsMenu'
 		main()
 	}
 	function onResize() {
-		log("resize")
+		// log("resize")
 	}
 
 
@@ -142,7 +142,7 @@ ${sizeClassesCSS}
 
 	function findPlayer() {
 		const player = document.getElementById('movie_player')
-		log("found player", player)
+		// log("found player", player)
 		return player
 	}
 

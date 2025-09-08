@@ -264,7 +264,6 @@
       "1280x720": { width: "1280px", height: "720px" }
     };
     const sizeClassesCSS = Object.entries(SIZES).map(([key, val]) => `.${MINI_CLASS}.${MINI_SIZE_CLASS_PREFIX}-${key}{width:${val.width} !important;height:${val.height} !important;}`).join("\n");
-    log(sizeClassesCSS);
     function addGlobalListeners() {
       if (listenersAdded) return;
       sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
@@ -280,7 +279,6 @@
       main();
     }
     function onResize() {
-      log("resize");
     }
     function injectCSS() {
       if (!document.getElementById(STYLE_ID)) {
@@ -344,7 +342,6 @@ ${sizeClassesCSS}
     }
     function findPlayer() {
       const player = document.getElementById("movie_player");
-      log("found player", player);
       return player;
     }
     function activate(target) {
