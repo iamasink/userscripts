@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   https://userscripts.iamas.ink
-// @version     1.11
+// @version     1.12
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
+// @match       https://music.youtube.com/*
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @author      iamasink
@@ -45,7 +46,12 @@ import type { SettingOption } from '../lib/settingsMenu'
 	function addGlobalListeners() {
 		if (listenersAdded) return
 
-		sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS)
+		if (new URL(window.location.href).hostname === "music.youtube.com") {
+			sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS, "#left-controls", "above")
+		} else {
+			sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, SETTINGS, "#owner", "below")
+		}
+
 
 		document.addEventListener('mousedown', onMouseDown)
 		document.addEventListener('mouseup', onMouseUp)
