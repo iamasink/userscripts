@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Music Scroll volume change
 // @namespace   https://userscripts.iamas.ink
-// @version     1.2
+// @version     1.3
 // @description Use scroll wheel to change volume anywhere on YouTube Music
 // @match       https://music.youtube.com/*
 // @grant       none
@@ -61,7 +61,8 @@
             volumeSlider.classList.remove("on-hover");
           }, 1e3);
         }
-        log(`changed volume: ${newVol}`);
+        showOverlay("Volume", `${newVol}%`);
+        log(`changed volume: ${newVol}%`);
       } catch (e2) {
         logWarn("couldn't get/set volume. is the page still loading?", e2);
       }
@@ -78,6 +79,32 @@
         el = el.parentElement;
       }
       return false;
+    }
+    function showOverlay(type, text) {
+      const id = "scrollgesture-overlay";
+      let overlay = document.getElementById(id);
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = id;
+        Object.assign(overlay.style, {
+          position: "fixed",
+          top: "10%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          padding: "8px 16px",
+          background: "rgba(0,0,0,0.7)",
+          color: "#fff",
+          fontSize: "16px",
+          borderRadius: "4px",
+          zIndex: "9999",
+          pointerEvents: "none"
+        });
+        document.body.appendChild(overlay);
+      }
+      overlay.textContent = `${type}: ${text}`;
+      overlay.style.display = "block";
+      clearTimeout(overlay.hideTimer);
+      overlay.hideTimer = setTimeout(() => overlay.style.display = "none", 1e3);
     }
   })();
 })();
