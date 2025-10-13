@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Music Scroll volume change
 // @namespace   https://userscripts.iamas.ink
-// @version     1.1.0
+// @version     1.2
 // @description Use scroll wheel to change volume anywhere on YouTube Music
 // @match       https://music.youtube.com/*
 // @grant       none
@@ -18,20 +18,27 @@
 
 "use strict";
 (() => {
-  // src/userscript/YouTubeMusicScrollVolume.ts
-  (function() {
-    const LOGGING_ENABLED = false;
+  // src/lib/init.ts
+  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
-    const SCRIPT_SHORTNAME = GM_info.script.updateURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".");
+    const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
     const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
     const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
     const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
     const logError = (...args) => console.error(LOG_PREFIX, ...args);
     console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
+    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError };
+  }
+
+  // src/userscript/YouTubeMusicScrollVolume.ts
+  (function() {
+    const LOGGING_ENABLED = false;
+    const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({});
     let volumeSliderTimeout;
     addEventListener("wheel", (e) => {
       if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      if (e.buttons > 0) return;
       if (isInsideScrollable(e.target)) return;
       const player = document.querySelector("#movie_player");
       if (!player) {
