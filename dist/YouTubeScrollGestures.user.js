@@ -61,7 +61,7 @@
       if (!container) {
         container = document.createElement("div");
         container.id = SHARED_CONTAINER_ID;
-        container.style.marginTop = "8px";
+        container.style.margin = "auto";
         container.style.position = "relative";
         owner.appendChild(container);
         const cog = document.createElement("button");
