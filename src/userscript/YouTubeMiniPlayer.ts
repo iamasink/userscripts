@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   https://userscripts.iamas.ink
-// @version     1.11
+// @version     1.12
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -87,21 +87,22 @@ import type { SettingOption } from '../lib/settingsMenu'
 .${MINI_CLASS} {
 	position: fixed !important;
 	z-index: 9999 !important;
-	box-shadow: 0 0 24px rgba(0,0,0,0.6) !important;
+	box-shadow: 0 0 24px rgba(0,0,0,0.9) !important;
 	transform: none !important;
+	background: #350000;
 }
 
 ${sizeClassesCSS}
 
 /* Miniplayer positions */
 .${MINI_CLASS}.${MINI_POS_CLASS_PREFIX}-top-right {
-	top: 20px !important;
+	top: 50px !important;
 	right: 20px !important;
 	bottom: auto !important;
 	left: auto !important;
 }
 .${MINI_CLASS}.${MINI_POS_CLASS_PREFIX}-top-left {
-	top: 20px !important;
+	top: 50px !important;
 	left: 20px !important;
 	bottom: auto !important;
 	right: auto !important;
@@ -141,7 +142,8 @@ ${sizeClassesCSS}
 	}
 
 	function findPlayer() {
-		const player = document.getElementById('movie_player')
+		// const player = document.getElementById('movie_player')
+		const player = document.getElementById('player-full-bleed-container') // new container for new ui idk
 		// log("found player", player)
 		return player
 	}
