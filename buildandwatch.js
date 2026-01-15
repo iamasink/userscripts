@@ -44,6 +44,7 @@ function buildAll() {
 		});
 		console.log("done", f, "->", outFile);
 	}
+	console.log("All done :)", new Date().toTimeString(""));
 }
 
 buildAll();
