@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   https://userscripts.iamas.ink
-// @version     1.12.1
+// @version     1.12.2
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -60,7 +60,7 @@ import type { SettingOption } from '../lib/settingsMenu'
 		if (listenersAdded) return
 
 		sm = addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME, [
-			{ label: 'Miniplayer Position', type: 'select', choices: POSITIONS, defaultValue: "top-right" },
+			{ label: 'Miniplayer Position', type: 'select', choices: POSITIONS, defaultValue: "top-left" },
 			{ label: "Miniplayer Size", type: "select", choices: Object.keys(SIZES), defaultValue: "400x225" }
 		])
 		window.addEventListener('scroll', onScroll, { passive: true })
