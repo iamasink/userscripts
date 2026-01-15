@@ -115,6 +115,14 @@ export function addSettingsMenu(
 				e.stopImmediatePropagation()
 			})
 
+			const info = document.createElement("p")
+			info.textContent = `sinkussettings-${SCRIPT_SHORTNAME}`
+			Object.assign(info.style, {
+				color: "#66666680"
+			})
+			popup.appendChild(info)
+
+
 			cog.addEventListener('click', (e) => {
 				popup!.style.display = popup!.style.display === 'none' ? 'block' : 'none'
 				e.preventDefault()

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Music Scroll volume change
 // @namespace   https://userscripts.iamas.ink
-// @version     1.3
+// @version     1.4
 // @description Use scroll wheel to change volume anywhere on YouTube Music
 // @match       https://music.youtube.com/*
 // @grant       none
