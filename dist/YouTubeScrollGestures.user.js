@@ -21,7 +21,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -77,7 +77,8 @@
           cursor: "pointer",
           width: "40px",
           height: "36px",
-          marginRight: "8px"
+          marginRight: "8px",
+          marginLeft: "8px"
         });
         container.appendChild(cog);
         popup = document.createElement("div");

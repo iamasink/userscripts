@@ -48,7 +48,8 @@ export function addSettingsMenu(
 				cursor: 'pointer',
 				width: '40px',
 				height: '36px',
-				marginRight: '8px'
+				marginRight: '8px',
+				marginLeft: '8px'
 			})
 			container.appendChild(cog)
 

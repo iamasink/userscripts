@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   https://userscripts.iamas.ink
-// @version     1.12
+// @version     1.12.1
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -11,7 +11,7 @@
 // @supportURL  https://github.com/iamasink/userscripts/issues
 // @downloadURL https://raw.githubusercontent.com/iamasink/userscripts/main/dist/YouTubeMiniPlayer.user.js
 // @updateURL   https://raw.githubusercontent.com/iamasink/userscripts/main/dist/YouTubeMiniPlayer.user.js
-// @tag         tags
+// @tag         youtube
 // @icon        https://www.google.com/s2/favicons?domain=youtube.com
 // @license     MIT
 // ==/UserScript==
@@ -20,7 +20,7 @@
 "use strict";
 (() => {
   // src/lib/init.ts
-  function init({ LOGGING_ENABLED = false ? true : false } = {}) {
+  function init({ LOGGING_ENABLED = true ? true : false } = {}) {
     const SCRIPT_NAME = GM_info.script.name;
     const SCRIPT_SHORTNAME = GM_info.script.downloadURL.split("/").slice(-1)[0].split(".").slice(0, -2).join(".").trim() || SCRIPT_NAME.replace(" ", "").trim();
     const SCRIPT_VERSION = GM_info.script.version;
@@ -76,7 +76,8 @@
           cursor: "pointer",
           width: "40px",
           height: "36px",
-          marginRight: "8px"
+          marginRight: "8px",
+          marginLeft: "8px"
         });
         container.appendChild(cog);
         popup = document.createElement("div");
