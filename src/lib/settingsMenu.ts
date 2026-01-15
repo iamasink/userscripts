@@ -1,10 +1,16 @@
 import { waitForElement } from "./util"
 
+type BaseOption<T> = {
+	label: string
+	defaultValue: T
+	onChange?: (newValue: T) => void
+}
+
 export type SettingOption =
-	| { label: string; type: 'checkbox'; defaultValue: boolean }
-	| { label: string; type: 'number'; defaultValue: number; step?: number; min?: number; max?: number }
-	| { label: string; type: 'text'; defaultValue: string }
-	| { label: string; type: 'select'; defaultValue: string; choices: string[] }
+	| (BaseOption<boolean> & { type: 'checkbox' })
+	| (BaseOption<number> & { type: 'number'; step?: number; min?: number; max?: number })
+	| (BaseOption<string> & { type: 'text' })
+	| (BaseOption<string> & { type: 'select'; choices: string[] })
 	| { type: 'spacer' }
 
 const SHARED_POPUP_ID = 'sinkusoption-popup'
@@ -211,7 +217,7 @@ export function addSettingsMenu(
 			input.type = 'text';
 			(input as HTMLInputElement).value = String(value)
 			input.style.width = '100%'
-		} else if (opt.type === "select") { // select
+		} else if (opt.type === "select") {
 			const select = document.createElement('select')
 			opt.choices.forEach(choice => {
 				const optionEl = document.createElement('option')
@@ -235,6 +241,10 @@ export function addSettingsMenu(
 			else if (opt.type === 'number') newVal = parseFloat((e.target as HTMLInputElement).value)
 			else newVal = (e.target as HTMLInputElement | HTMLSelectElement).value
 			GM_setValue(gmKey, newVal)
+
+			if (opt.onChange) {
+				(opt.onChange as (value: any) => void)(newVal)
+			}
 		})
 
 		const content = section.querySelector('div')!
