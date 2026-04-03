@@ -25,6 +25,11 @@ export function addSettingsMenu(
 	ownerElement: string = '#owner',
 	location: "above" | "below" = "below",
 ) {
+
+	function getGmKey(label: string) {
+		return `sinkusoption-${SCRIPT_SHORTNAME}-${label.toLowerCase().replace(/\s+/g, '-')}`
+	}
+
 	async function ensureOptionsMenu(): Promise<HTMLElement | null> {
 		// maybe scuffed i do not care
 		let popup = await waitForElement('#sinkusoption-popup', 100, 1000)
@@ -142,14 +147,14 @@ export function addSettingsMenu(
 		if (!popup) return null
 
 		const sectionId = `sinkusoption-section-${SCRIPT_SHORTNAME}`
-		let section = document.getElementById(sectionId)
-		if (section) return section
+		const existing = document.getElementById(sectionId)
+		if (existing) return existing
 
 		const hr = document.createElement('hr')
 		Object.assign(hr.style, { border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', margin: '8px 0' })
 		popup.appendChild(hr)
 
-		section = document.createElement('div')
+		const section = document.createElement('div')
 		section.id = sectionId
 		section.style.marginBottom = '6px'
 
@@ -162,19 +167,17 @@ export function addSettingsMenu(
 		content.className = `sinkusoption-section-content-${SCRIPT_SHORTNAME}`
 		section.appendChild(content)
 
-		// ok this doesnt really work but i cba to change it
-
+		// alphabetica
 		const existingSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkusoption-section-"]'))
-		const index = existingSections.findIndex(s => {
+		const insertBefore = existingSections.find(s => {
 			const h = s.querySelector('h4')?.textContent ?? ''
-			return h.localeCompare(SCRIPT_NAME, undefined, { sensitivity: 'base' }) < 0
+			return SCRIPT_NAME.localeCompare(h, undefined, { sensitivity: 'base' }) < 0
 		})
-		console.log(index)
 
-		if (index === -1) {
-			popup.appendChild(section)
+		if (insertBefore) {
+			popup.insertBefore(section, insertBefore)
 		} else {
-			popup.insertBefore(section, existingSections[index])
+			popup.appendChild(section)
 		}
 
 		const allSections = Array.from(popup.querySelectorAll<HTMLElement>('div[id^="sinkusoption-section-"]'))
@@ -189,16 +192,18 @@ export function addSettingsMenu(
 	async function addOption(opt: SettingOption) {
 		const section = await ensureScriptSection()
 		if (!section) return
+
+		const content = section.querySelector<HTMLElement>(`.sinkusoption-section-content-${SCRIPT_SHORTNAME}`)!
+
 		if (opt.type === 'spacer') {
 			const spacer = document.createElement('div')
 			spacer.style.height = '10px'
-			section.querySelector('div')!.appendChild(spacer)
+			content.appendChild(spacer)
 			return
 		}
 
-		const gmKey = `sinkusoption-${SCRIPT_SHORTNAME}-${opt.label.toLowerCase().replace(/\s+/g, '-')}`
-
-		let value: boolean | number | string = (opt as any).defaultValue
+		const gmKey = getGmKey(opt.label)
+		let value: boolean | number | string = opt.defaultValue
 		if (opt.type === 'checkbox') value = GM_getValue(gmKey, (opt as any).defaultValue)
 		else if (opt.type === 'number') value = parseFloat(GM_getValue(gmKey, (opt as any).defaultValue.toString()))
 		else value = GM_getValue(gmKey, (opt as any).defaultValue)
@@ -209,21 +214,21 @@ export function addSettingsMenu(
 
 		let input: HTMLInputElement | HTMLSelectElement
 		if (opt.type === 'checkbox') {
-			input = document.createElement('input')
+			input = document.createElement('input') as HTMLInputElement
 			input.type = 'checkbox';
-			(input as HTMLInputElement).checked = value as boolean
+			input.checked = value as boolean
 		} else if (opt.type === 'number') {
-			input = document.createElement('input')
+			input = document.createElement('input') as HTMLInputElement
 			input.type = 'number';
-			(input as HTMLInputElement).value = (value as number).toString()
+			input.value = value.toString()
 			input.style.width = '70px'
-			if ('step' in opt && opt.step !== undefined) (input as HTMLInputElement).step = String(opt.step)
-			if ('min' in opt && opt.min !== undefined) (input as HTMLInputElement).min = String(opt.min)
-			if ('max' in opt && opt.max !== undefined) (input as HTMLInputElement).max = String(opt.max)
+			if (opt.step !== undefined) input.step = String(opt.step)
+			if (opt.min !== undefined) input.min = String(opt.min)
+			if (opt.max !== undefined) input.max = String(opt.max)
 		} else if (opt.type === 'text') {
-			input = document.createElement('input')
+			input = document.createElement('input') as HTMLInputElement
 			input.type = 'text';
-			(input as HTMLInputElement).value = String(value)
+			input.value = value.toString()
 			input.style.width = '100%'
 		} else if (opt.type === "select") {
 			const select = document.createElement('select')
@@ -255,29 +260,57 @@ export function addSettingsMenu(
 			}
 		})
 
-		const content = section.querySelector('div')!
 		wrapper.appendChild(input)
 		wrapper.append(' ' + opt.label)
 		content.appendChild(wrapper)
 	}
 
 	function getSetting(label: string): boolean | number | string | undefined {
-		const gmKey = `sinkusoption-${SCRIPT_SHORTNAME}-${label.toLowerCase().replace(/\s+/g, '-')}`
-		const opt = options.find(o => 'label' in o && (o as any).label === label) as SettingOption | undefined
-		if (!opt) throw new Error(`Setting not found: ${label}`)
+		const opt = options.find(o => 'label' in o && o.label === label)
+		if (!opt || opt.type === 'spacer') {
+			console.warn(`[iamasink userscript settings] getSetting: no setting found with label "${label}"`)
+			return undefined
+		}
+		const gmKey = getGmKey(opt.label)
 		try {
-			if (opt.type === 'checkbox') return GM_getValue(gmKey, (opt as any).defaultValue)
-			if (opt.type === 'number') return parseFloat(GM_getValue(gmKey, (opt as any).defaultValue.toString()))
-			return GM_getValue(gmKey, (opt as any).defaultValue)
+			// if (opt.type === 'checkbox') return GM_getValue(gmKey, opt.defaultValue)
+			if (opt.type === 'number') return parseFloat(GM_getValue(gmKey, opt.defaultValue.toString()))
+			return GM_getValue(gmKey, opt.defaultValue)
 		} catch {
-			return (opt as any).defaultValue
+			return opt.defaultValue
 		}
 	}
 
+	function setSetting(label: string, value: boolean | number | string): void {
+		const opt = options.find(o => 'label' in o && o.label === label)
+		if (!opt || opt.type === 'spacer') {
+			console.warn(`[iamasink userscript settings] setSetting: no setting found with label "${label}"`)
+			return
+		}
+		GM_setValue(getGmKey(label), value)
 
-	// check it doesnt already have a thing
-	const section = document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`)
-	if (!section) options.forEach(addOption)
+		const section = document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`)
+		if (!section) return
+		const content = section.querySelector<HTMLElement>(`.sinkusoption-section-content-${SCRIPT_SHORTNAME}`)
+		if (!content) return
 
-	return { getSetting }
+		const labels = Array.from(content.querySelectorAll('label'))
+		const wrapper = labels.find(l => l.textContent?.trim().endsWith(label))
+		if (!wrapper) return
+
+		const input = wrapper.querySelector<HTMLInputElement | HTMLSelectElement>('input, select')
+		if (!input) return
+
+		if (input instanceof HTMLInputElement && input.type === 'checkbox') {
+			input.checked = value as boolean
+		} else {
+			input.value = String(value)
+		}
+	}
+
+	if (!document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`)) {
+		options.forEach(addOption)
+	}
+
+	return { getSetting, setSetting }
 }
