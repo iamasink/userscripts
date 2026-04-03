@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Scroll Gestures
 // @namespace   https://userscripts.iamas.ink
-// @version     1.13
+// @version     1.14
 // @description Adds scroll gestures for Speed (ctrl+scroll) and Volume (rclick+scroll) like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @match       https://music.youtube.com/*
@@ -52,6 +52,9 @@
   var SHARED_CONTAINER_ID = "sinkusoption-container";
   var SHARED_COG_ID = "sinkusoption-cog";
   function addSettingsMenu(SCRIPT_SHORTNAME, SCRIPT_NAME = SCRIPT_SHORTNAME, options, ownerElement = "#owner", location = "below") {
+    function getGmKey(label) {
+      return `sinkusoption-${SCRIPT_SHORTNAME}-${label.toLowerCase().replace(/\s+/g, "-")}`;
+    }
     async function ensureOptionsMenu() {
       let popup = await waitForElement("#sinkusoption-popup", 100, 1e3);
       if (popup) return popup;
@@ -132,6 +135,12 @@
           e.preventDefault();
           e.stopImmediatePropagation();
         });
+        const info = document.createElement("p");
+        info.textContent = `sinkussettings-${SCRIPT_SHORTNAME}`;
+        Object.assign(info.style, {
+          color: "#66666680"
+        });
+        popup.appendChild(info);
         cog.addEventListener("click", (e) => {
           popup.style.display = popup.style.display === "none" ? "block" : "none";
           e.preventDefault();
@@ -147,31 +156,30 @@
       const popup = await ensureOptionsMenu();
       if (!popup) return null;
       const sectionId = `sinkusoption-section-${SCRIPT_SHORTNAME}`;
-      let section2 = document.getElementById(sectionId);
-      if (section2) return section2;
+      const existing = document.getElementById(sectionId);
+      if (existing) return existing;
       const hr = document.createElement("hr");
       Object.assign(hr.style, { border: "none", borderTop: "1px solid rgba(255,255,255,0.08)", margin: "8px 0" });
       popup.appendChild(hr);
-      section2 = document.createElement("div");
-      section2.id = sectionId;
-      section2.style.marginBottom = "6px";
+      const section = document.createElement("div");
+      section.id = sectionId;
+      section.style.marginBottom = "6px";
       const header = document.createElement("h4");
       header.textContent = SCRIPT_NAME;
       Object.assign(header.style, { margin: "0 0 6px 0", fontSize: "15px" });
-      section2.appendChild(header);
+      section.appendChild(header);
       const content = document.createElement("div");
       content.className = `sinkusoption-section-content-${SCRIPT_SHORTNAME}`;
-      section2.appendChild(content);
+      section.appendChild(content);
       const existingSections = Array.from(popup.querySelectorAll('div[id^="sinkusoption-section-"]'));
-      const index = existingSections.findIndex((s) => {
+      const insertBefore = existingSections.find((s) => {
         const h = s.querySelector("h4")?.textContent ?? "";
-        return h.localeCompare(SCRIPT_NAME, void 0, { sensitivity: "base" }) < 0;
+        return SCRIPT_NAME.localeCompare(h, void 0, { sensitivity: "base" }) < 0;
       });
-      console.log(index);
-      if (index === -1) {
-        popup.appendChild(section2);
+      if (insertBefore) {
+        popup.insertBefore(section, insertBefore);
       } else {
-        popup.insertBefore(section2, existingSections[index]);
+        popup.appendChild(section);
       }
       const allSections = Array.from(popup.querySelectorAll('div[id^="sinkusoption-section-"]'));
       allSections.forEach((sec, i) => {
@@ -179,18 +187,19 @@
         else sec.style.borderTop = "1px solid rgba(255,255,255,0.08)";
         sec.style.paddingTop = "8px";
       });
-      return section2;
+      return section;
     }
     async function addOption(opt) {
-      const section2 = await ensureScriptSection();
-      if (!section2) return;
+      const section = await ensureScriptSection();
+      if (!section) return;
+      const content = section.querySelector(`.sinkusoption-section-content-${SCRIPT_SHORTNAME}`);
       if (opt.type === "spacer") {
         const spacer = document.createElement("div");
         spacer.style.height = "10px";
-        section2.querySelector("div").appendChild(spacer);
+        content.appendChild(spacer);
         return;
       }
-      const gmKey = `sinkusoption-${SCRIPT_SHORTNAME}-${opt.label.toLowerCase().replace(/\s+/g, "-")}`;
+      const gmKey = getGmKey(opt.label);
       let value = opt.defaultValue;
       if (opt.type === "checkbox") value = GM_getValue(gmKey, opt.defaultValue);
       else if (opt.type === "number") value = parseFloat(GM_getValue(gmKey, opt.defaultValue.toString()));
@@ -208,13 +217,13 @@
         input.type = "number";
         input.value = value.toString();
         input.style.width = "70px";
-        if ("step" in opt && opt.step !== void 0) input.step = String(opt.step);
-        if ("min" in opt && opt.min !== void 0) input.min = String(opt.min);
-        if ("max" in opt && opt.max !== void 0) input.max = String(opt.max);
+        if (opt.step !== void 0) input.step = String(opt.step);
+        if (opt.min !== void 0) input.min = String(opt.min);
+        if (opt.max !== void 0) input.max = String(opt.max);
       } else if (opt.type === "text") {
         input = document.createElement("input");
         input.type = "text";
-        input.value = String(value);
+        input.value = value.toString();
         input.style.width = "100%";
       } else if (opt.type === "select") {
         const select = document.createElement("select");
@@ -242,26 +251,50 @@
           opt.onChange(newVal);
         }
       });
-      const content = section2.querySelector("div");
       wrapper.appendChild(input);
       wrapper.append(" " + opt.label);
       content.appendChild(wrapper);
     }
     function getSetting(label) {
-      const gmKey = `sinkusoption-${SCRIPT_SHORTNAME}-${label.toLowerCase().replace(/\s+/g, "-")}`;
       const opt = options.find((o) => "label" in o && o.label === label);
-      if (!opt) throw new Error(`Setting not found: ${label}`);
+      if (!opt || opt.type === "spacer") {
+        console.warn(`[iamasink userscript settings] getSetting: no setting found with label "${label}"`);
+        return void 0;
+      }
+      const gmKey = getGmKey(opt.label);
       try {
-        if (opt.type === "checkbox") return GM_getValue(gmKey, opt.defaultValue);
         if (opt.type === "number") return parseFloat(GM_getValue(gmKey, opt.defaultValue.toString()));
         return GM_getValue(gmKey, opt.defaultValue);
       } catch {
         return opt.defaultValue;
       }
     }
-    const section = document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`);
-    if (!section) options.forEach(addOption);
-    return { getSetting };
+    function setSetting(label, value) {
+      const opt = options.find((o) => "label" in o && o.label === label);
+      if (!opt || opt.type === "spacer") {
+        console.warn(`[iamasink userscript settings] setSetting: no setting found with label "${label}"`);
+        return;
+      }
+      GM_setValue(getGmKey(label), value);
+      const section = document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`);
+      if (!section) return;
+      const content = section.querySelector(`.sinkusoption-section-content-${SCRIPT_SHORTNAME}`);
+      if (!content) return;
+      const labels = Array.from(content.querySelectorAll("label"));
+      const wrapper = labels.find((l) => l.textContent?.trim().endsWith(label));
+      if (!wrapper) return;
+      const input = wrapper.querySelector("input, select");
+      if (!input) return;
+      if (input instanceof HTMLInputElement && input.type === "checkbox") {
+        input.checked = value;
+      } else {
+        input.value = String(value);
+      }
+    }
+    if (!document.getElementById(`sinkusoption-section-${SCRIPT_SHORTNAME}`)) {
+      options.forEach(addOption);
+    }
+    return { getSetting, setSetting };
   }
 
   // src/userscript/YouTubeScrollGestures.ts
