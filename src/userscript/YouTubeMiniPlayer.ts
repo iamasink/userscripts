@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   https://userscripts.iamas.ink
-// @version     1.13
+// @version     1.14
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -18,7 +18,6 @@
 
 import { init } from "../lib/init"
 import { addSettingsMenu } from '../lib/settingsMenu'
-import type { SettingOption } from '../lib/settingsMenu'
 
 (function () {
 	const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({})
@@ -28,6 +27,7 @@ import type { SettingOption } from '../lib/settingsMenu'
 	const MINI_POS_CLASS_PREFIX = `${shortnameLower}-miniplayerpos`
 	const MINI_SIZE_CLASS_PREFIX = `${shortnameLower}-miniplayersize`
 	const CTRLS_CLASS = `${shortnameLower}-miniplayer-ctrls`
+
 	let listenersAdded = false
 	let ticking = false
 	let playerEl: HTMLElement | null = null
@@ -35,7 +35,6 @@ import type { SettingOption } from '../lib/settingsMenu'
 	let closed = false
 	let triggerY = 500
 
-	let sm: any
 
 	const POSITIONS = ["top-right", "top-left", "bottom-left", "bottom-right"]
 	const SIZES = {
@@ -53,8 +52,8 @@ import type { SettingOption } from '../lib/settingsMenu'
 	const sizeClassesCSS = Object.entries(SIZES)
 		.map(([key, val]) => `.${MINI_CLASS}.${MINI_SIZE_CLASS_PREFIX}-${key}{width:${val.width} !important;height:${val.height} !important;}`)
 		.join("\n")
-	// log(sizeClassesCSS)
 
+	let sm: any
 
 	function addGlobalListeners() {
 		if (listenersAdded) return
@@ -72,24 +71,41 @@ import type { SettingOption } from '../lib/settingsMenu'
 	}
 
 	function onNavigate() {
+		// reset
+		closed = false
+		playerEl = null
 		main()
 	}
-	function onResize() {
-		// log("resize")
-	}
-
 
 	function injectCSS() {
-		if (!document.getElementById(STYLE_ID)) {
-			const s = document.createElement('style')
-			s.id = STYLE_ID
-			s.textContent = `
+		if (document.getElementById(STYLE_ID)) return
+
+		const s = document.createElement('style')
+		s.id = STYLE_ID
+		s.textContent = `
 .${MINI_CLASS} {
 	position: fixed !important;
-	z-index: 9999 !important;
-	box-shadow: 0 0 24px rgba(0,0,0,0.9) !important;
+	z-index: 2006 !important;
+	box-shadow: 0 4px 24px rgba(0,0,0,0.9) !important;
 	transform: none !important;
 	background: #350000;
+
+
+	top: 0 !important;
+	left: 0 !important;
+	max-width: 100vw !important;
+	max-height: calc(100vh - var(--it-header-size)) !important;
+	will-change: transform, width, height !important;
+}
+
+.${MINI_CLASS} video {
+	top: 0 !important;
+	left: 0 !important;
+	width: 100% !important;
+	height: 100% !important;
+}
+.${MINI_CLASS} .html5-video-container {
+	height: 100% !important;
 }
 
 ${sizeClassesCSS}
@@ -137,14 +153,13 @@ ${sizeClassesCSS}
     padding: 0;
 }
 `
-			document.head.appendChild(s)
-		}
+		document.head.appendChild(s)
 	}
 
 	function findPlayer() {
-		// const player = document.getElementById('movie_player')
-		const player = document.getElementById('player-full-bleed-container') // new container for new ui idk
-		// log("found player", player)
+		// this is best with styling to fix it yay
+		const player = document.getElementById('movie_player')
+		log("found player", player)
 		return player
 	}
 
@@ -172,9 +187,8 @@ ${sizeClassesCSS}
 		// trigger youtube's resize logic
 		window.dispatchEvent(new Event("resize"))
 
-		let closeBtn = target.querySelector("." + CTRLS_CLASS) as HTMLElement
-		if (!closeBtn) {
-			closeBtn = document.createElement('button')
+		if (!target.querySelector("." + CTRLS_CLASS)) {
+			const closeBtn = document.createElement('button')
 			closeBtn.textContent = 'x'
 			closeBtn.className = CTRLS_CLASS
 			closeBtn.addEventListener('click', () => {
@@ -218,7 +232,7 @@ ${sizeClassesCSS}
 			if (!playerEl) playerEl = findPlayer()
 			if (!playerEl) return
 
-			if (new URL(window.location.href).pathname != "/watch") {
+			if (window.location.pathname != "/watch") {
 				// we're not on a video page!
 				if (active) {
 					restore(playerEl)
@@ -229,8 +243,7 @@ ${sizeClassesCSS}
 			if (window.scrollY >= triggerY && !active) {
 				activate(playerEl)
 				return
-			}
-			if (window.scrollY < triggerY) {
+			} else if (window.scrollY < triggerY) {
 				closed = false
 				if (active) {
 					restore(playerEl)
