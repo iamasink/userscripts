@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   https://userscripts.iamas.ink
-// @version     1.14
+// @version     1.15
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -423,6 +423,8 @@ ${sizeClassesCSS}
       log("found player", player);
       return player;
     }
+    let playerParent = null;
+    let playerNextSibling = null;
     function activate(target) {
       log("activating");
       if (!target || closed || target.classList.contains(MINI_CLASS)) {
@@ -434,6 +436,9 @@ ${sizeClassesCSS}
       for (let i = 0, len = POSITIONS.length; i < len; i++) {
         target.classList.remove(`${MINI_POS_CLASS_PREFIX}-${POSITIONS[i]}`);
       }
+      playerParent = target.parentElement;
+      playerNextSibling = target.nextSibling;
+      document.body.appendChild(target);
       target.classList.add(MINI_CLASS);
       target.classList.add(`${MINI_POS_CLASS_PREFIX}-${pos}`);
       target.classList.add(`${MINI_SIZE_CLASS_PREFIX}-${size}`);
@@ -460,6 +465,11 @@ ${sizeClassesCSS}
       target.classList.remove(MINI_CLASS);
       const closeBtn = target.querySelector("." + CTRLS_CLASS);
       if (closeBtn) closeBtn.remove();
+      if (playerParent) {
+        playerParent.insertBefore(target, playerNextSibling);
+        playerParent = null;
+        playerNextSibling = null;
+      }
       window.dispatchEvent(new Event("resize"));
       if (playerEl === target) playerEl = null;
       active = false;
