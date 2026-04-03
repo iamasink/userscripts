@@ -238,6 +238,9 @@
         else if (opt.type === "number") newVal = parseFloat(e.target.value);
         else newVal = e.target.value;
         GM_setValue(gmKey, newVal);
+        if (opt.onChange) {
+          opt.onChange(newVal);
+        }
       });
       const content = section2.querySelector("div");
       wrapper.appendChild(input);
