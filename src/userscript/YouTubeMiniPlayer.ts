@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Popup Player
 // @namespace   https://userscripts.iamas.ink
-// @version     1.14
+// @version     1.15
 // @description Show a popup player when scrolling down to read the comments like from "Enhancer for YouTube™"
 // @match       https://www.youtube.com/*
 // @grant       GM_getValue
@@ -163,6 +163,9 @@ ${sizeClassesCSS}
 		return player
 	}
 
+	let playerParent: HTMLElement | null = null
+	let playerNextSibling: ChildNode | null = null
+
 	function activate(target: HTMLElement) {
 		log("activating")
 		if (!target || closed || target.classList.contains(MINI_CLASS)) {
@@ -179,6 +182,11 @@ ${sizeClassesCSS}
 		for (let i = 0, len = POSITIONS.length; i < len; i++) {
 			target.classList.remove(`${MINI_POS_CLASS_PREFIX}-${POSITIONS[i]}`)
 		}
+
+		// put player at root to fix weird z index stuff
+		playerParent = target.parentElement
+		playerNextSibling = target.nextSibling
+		document.body.appendChild(target)
 
 		target.classList.add(MINI_CLASS)
 		target.classList.add(`${MINI_POS_CLASS_PREFIX}-${pos}`)
@@ -214,7 +222,13 @@ ${sizeClassesCSS}
 		const closeBtn = target.querySelector("." + CTRLS_CLASS)
 		if (closeBtn) closeBtn.remove()
 
-		// trigger youtube's resize logic to resize the video player
+		// put it back
+		if (playerParent) {
+			playerParent.insertBefore(target, playerNextSibling)
+			playerParent = null
+			playerNextSibling = null
+		}
+
 		window.dispatchEvent(new Event("resize"))
 
 
