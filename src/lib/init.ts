@@ -1,4 +1,5 @@
 declare const ENV: string
+declare const GM_info: any
 /**
  * Initialize script info and logging.
  * @param options Logging options.
