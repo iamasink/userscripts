@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        YouTube Mix to YT Music
 // @namespace   https://userscripts.iamas.ink
-// @version     1.3.1
+// @version     1.3.2
 // @description Redirect to YouTube music if next up is a Mix
 // @match       https://www.youtube.com/*
 // @match       https://music.youtube.com/*
@@ -28,16 +28,16 @@
     const SCRIPT_VERSION = GM_info.script.version;
     const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
     const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
+    const logInfo = (...args) => console.info(LOG_PREFIX, ...args);
     const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
     const logError = (...args) => console.error(LOG_PREFIX, ...args);
     console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
-    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError };
+    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logInfo, logWarn, logError };
   }
 
   // src/userscript/YouTubeMixToMusic.ts
   (function() {
-    const LOGGING_ENABLED = false;
-    const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError } = init({});
+    const { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logInfo, logWarn, logError } = init({});
     function isMixUrl(url) {
       try {
         const u = new URL(url, window.location.origin);
@@ -75,35 +75,44 @@
         return false;
       }
       video.addEventListener("ended", () => {
-        const upNext = getUpNextUrl();
-        if (upNext && isMixUrl(upNext)) {
-          const newUrl = upNext.replace("www.youtube.com", "music.youtube.com");
-          let url = new URL(newUrl);
-          let volume = player.getVolume();
-          log("volume is ", volume);
-          GM.setValue("ytVolume", volume);
-          log("Redirecting to YouTube Music:", url);
-          log("see you there !");
-          window.location.href = url.toString();
-        } else {
-          log("next is not a mix");
+        if (document.visibilityState === "visible" && document.hasFocus()) {
+          log("video ended, but tab focused, not redirecting");
+          return;
         }
+        const upNext = getUpNextUrl();
+        if (!upNext || !isMixUrl(upNext)) {
+          log("next is not a mix");
+          return;
+        }
+        const newUrl = upNext.replace("www.youtube.com", "music.youtube.com");
+        let url = new URL(newUrl);
+        let volume = player.getVolume();
+        log("volume is ", volume);
+        GM.setValue("ytVolume", volume);
+        logInfo("Redirecting to YouTube Music:", url);
+        logInfo("see you there !");
+        window.location.href = url.toString();
       });
-      log("Video listener attached");
       return true;
     }
     function trySetupVideoListener() {
       log(new URL(location.href).pathname);
       if (new URL(location.href).pathname !== "/watch") return;
-      const interval = setInterval(async () => {
-        const success = await setupVideoListener();
-        if (success) {
-          clearInterval(interval);
-          log("Video listener successfully attached.");
-        } else {
-          log("Retrying setupVideoListener...");
+      const attempt = async () => {
+        try {
+          const success = await setupVideoListener();
+          if (success) {
+            clearInterval(interval);
+            log("Video listener successfully attached.");
+          } else {
+            log("Retrying setupVideoListener...");
+          }
+        } catch (err) {
+          console.error("setupVideoListener failed:", err);
         }
-      }, 1e3);
+      };
+      const interval = setInterval(attempt, 250);
+      attempt();
     }
     trySetupVideoListener();
     let lastUrl = location.href;

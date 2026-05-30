@@ -27,10 +27,11 @@
     const SCRIPT_VERSION = GM_info.script.version;
     const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`;
     const log = (...args) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args);
+    const logInfo = (...args) => console.info(LOG_PREFIX, ...args);
     const logWarn = (...args) => console.warn(LOG_PREFIX, ...args);
     const logError = (...args) => console.error(LOG_PREFIX, ...args);
     console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`);
-    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError };
+    return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logInfo, logWarn, logError };
   }
 
   // src/lib/util.ts
