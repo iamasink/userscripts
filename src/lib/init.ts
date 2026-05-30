@@ -15,6 +15,8 @@ export function init({ LOGGING_ENABLED = ENV === "dev" ? true : false } = {}): {
 	SCRIPT_VERSION: string
 	/** Console log wrapper */
 	log: (...args: any[]) => void
+	/** Console info wrapper */
+	logInfo: (...args: any[]) => void
 	/** Console warn wrapper */
 	logWarn: (...args: any[]) => void
 	/** Console error wrapper */
@@ -26,11 +28,12 @@ export function init({ LOGGING_ENABLED = ENV === "dev" ? true : false } = {}): {
 
 	const LOG_PREFIX = `[${SCRIPT_SHORTNAME}]`
 	const log = (...args: any[]) => LOGGING_ENABLED && console.log(LOG_PREFIX, ...args)
+	const logInfo = (...args: any[]) => console.info(LOG_PREFIX, ...args)
 	const logWarn = (...args: any[]) => console.warn(LOG_PREFIX, ...args)
 	const logError = (...args: any[]) => console.error(LOG_PREFIX, ...args)
 
 	console.log(`[${SCRIPT_SHORTNAME}] ${SCRIPT_NAME} v${SCRIPT_VERSION} by iamasink loaded`,)
 	// console.log(`[${SCRIPT_SHORTNAME}] built @${BUILD_TIME}`)
 
-	return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logWarn, logError }
+	return { SCRIPT_NAME, SCRIPT_SHORTNAME, SCRIPT_VERSION, log, logInfo, logWarn, logError }
 }
